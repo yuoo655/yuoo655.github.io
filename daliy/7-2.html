@@ -145,7 +145,7 @@
                     <main>
                         <h1 id="setp0------rust练习---a-hrefhttpsgithubcomrust-langrustlingsrustlingsafont"><a class="header" href="#setp0------rust练习---a-hrefhttpsgithubcomrust-langrustlingsrustlingsafont">setp0 ---- rust练习 -&gt; <a href="https://github.com/rust-lang/rustlings">rustlings</a></font></a></h1>
 <hr />
-<h1 id="asreft示例"><a class="header" href="#asreft示例">AsRef&lt;T&gt;示例:</a></h1>
+<p><strong>AsRef&lt;T&gt;示例</strong></p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -157,7 +157,8 @@ is_hello(s);
 <span class="boring">}
 </span></code></pre></pre>
 <p><strong>as_ref()</strong> 不能出错, 否则就需要用 <strong>Option<T> or a Result&lt;T,E&gt;</strong> 形式</p>
-<h1 id="enmu-match-组合示例"><a class="header" href="#enmu-match-组合示例">enmu match 组合示例:</a></h1>
+<p></br> <br/>
+<strong>enmu match 组合示例</strong></p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -184,6 +185,14 @@ fn process(&amp;mut self, message: Message) {
 <span class="boring">}
 </span></code></pre></pre>
 <p>其中<strong>value</strong>是枚举成员中包含的任意类型值,如果枚举成员中有2个以上变量可用 <strong>( _, _, value)</strong> 形式提取任意变量</p>
+<p></br> <br/>
+main函数也可返回'Result'</p>
+<pre><pre class="playground"><code class="language-rust">fn main() -&gt;Result&lt;(), E&gt;{
+    let cost = xxxxxxxxxxxxxx?;
+    Ok(())
+}
+</code></pre></pre>
+<p></br> <br/></p>
 
                     </main>
 
