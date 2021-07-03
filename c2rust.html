@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">开始之前</a></li><li class="chapter-item expanded "><a href="c2rust.html" class="active"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html" class="active"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">开始之前</a></li><li class="chapter-item expanded "><a href="c2rust.html" class="active"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html" class="active"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -145,6 +145,137 @@
                     <main>
                         <h1 id="-rust学习记录"><a class="header" href="#-rust学习记录">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
+<p><strong>看一个c语言例子</strong></p>
+<pre><code class="language-c">char  *_fx_directory_name_extract(char *source_ptr, char *dest_ptr){
+
+    unsigned int i;
+    /* Set the destination string to NULL.  */
+    dest_ptr[0] = 0;
+    /* Is a backslash present?  */
+    if ((*source_ptr == '\\') || (*source_ptr == '/')){
+        /* Advance the string pointer.  */
+        source_ptr++;
+    }
+    /* Loop to remove any leading spaces.  */
+    while (*source_ptr == ' '){
+
+        /* Position past leading space.  */
+        source_ptr++;
+    }
+
+    /* Loop to extract the name.  */
+    i = 0;
+    while (*source_ptr)
+    {
+
+        /* If another backslash is present, break the loop.  */
+        if ((*source_ptr == '\\') || (*source_ptr == '/'))
+        {
+            break;
+        }
+
+        /* Long name can be at most 255 characters, but are further limited by the
+           FX_MAX_LONG_NAME_LEN define.  */
+        if (i == FX_MAX_LONG_NAME_LEN - 1)
+        {
+            break;
+        }
+
+        /* Store the character.  */
+        dest_ptr[i] =  *source_ptr++;
+
+        /* Increment the character counter.  */
+        i++;
+    }
+
+    /* NULL-terminate the string.  */
+    dest_ptr[i] =  0;
+
+    /* Determine if we can backup to the previous character.  */
+    if (i)
+    {
+
+        /* Yes, we can move backwards.  */
+        i--;
+    }
+
+    /* Get rid of trailing blanks in the destination string.  */
+    while (dest_ptr[i] == ' ')
+    {
+
+        /* Set this entry to NULL.  */
+        dest_ptr[i] =  0;
+
+        /* Backup to the next character. Since leading spaces have been removed,
+           we know that the index is always greater than 1.  */
+        i--;
+    }
+
+    /* Determine if the source string is now at the end.  */
+    if (*source_ptr == 0)
+    {
+
+        /* Yes, return a NULL pointer.  */
+        source_ptr = FX_NULL;
+    }
+
+    /* Return the last pointer position in the source.  */
+    return(source_ptr);
+}
+
+</code></pre>
+<p><strong>以下是rust实现</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn fx_directory_name_extract(source: &amp;String, dest:&amp;mut String) -&gt; Option&lt;String&gt; {
+
+    let mut idx: usize = 0;
+    let mut j: usize;
+
+    // /* Is a backslash present?  */
+    if( (source.as_bytes()[0] == b'\\') || (source.as_bytes()[0] == b'/') ){
+        /* Advance the string pointer.  */
+        idx += 1;
+    }
+
+
+    /* Loop to remove any leading spaces.  */
+    while( source.as_bytes()[idx] == b' '){
+        /* Position past leading space.  */
+        idx+= 1;
+    }
+
+    j = 0;
+    for (i, c) in source.chars().enumerate() {
+        j+=1;
+        if i &lt; idx {
+            continue;
+        }
+
+        if( (c == '\\') || (c == '/')){
+            j-=1;
+            break;
+        }
+
+        /* Long name can be at most 255 characters, but are further limited by the
+            FX_MAX_LONG_NAME_LEN define.  */
+        if (i == 256 - 1){
+            break;
+        }
+        dest.push(c);
+    }
+
+    /* Determine if the source string is now at the end.  */
+    if ( j == source.len()) {
+        /* Yes, return a NULL pointer.  */
+        return None;
+    }
+    
+    return Some( source[j..].to_string());
+}
+<span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 
