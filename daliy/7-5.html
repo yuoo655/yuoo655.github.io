@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>🚧 foo</title>
+        <title>7.5</title>
                 
 
         <!-- Custom HTML head -->
@@ -14,21 +14,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
-                <link rel="icon" href="favicon.svg">
-                        <link rel="shortcut icon" href="favicon.png">
-                <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-                <link rel="stylesheet" href="css/print.css" media="print">
+                <link rel="icon" href="../favicon.svg">
+                        <link rel="shortcut icon" href="../favicon.png">
+                <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+                <link rel="stylesheet" href="../css/print.css" media="print">
         
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-                <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="../fonts/fonts.css">
         
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         
@@ -36,7 +36,7 @@
     <body>
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
-            var path_to_root = "";
+            var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">开始之前</a></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="foo.html" class="active"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html" class="active"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -114,7 +114,7 @@
                     <h1 class="menu-title"></h1>
 
                     <div class="right-buttons">
-                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                                                <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
                                                                         
@@ -143,43 +143,45 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="-foo"><a class="header" href="#-foo">🚧 foo</a></h1>
-<p><strong>记录一些新技能</strong></p>
-<p><strong>docker</strong>
-在配置github+gitpod中学习了docker的基本用法包括image生成.container使用</p>
-<p><br/> </br></p>
-<p><strong>获取基础镜像</strong></p>
-<p>如果我们本地没有 ubuntu 镜像，我们可以使用 docker pull 命令来载入 ubuntu 镜像</p>
-<pre><code class="language-shell">$ docker pull ubuntu
-</code></pre>
-<p><strong>启动容器</strong></p>
-<pre><code>$ docker run -it ubuntu /bin/bash
-</code></pre>
-<p><strong>安装环境(略)</strong></p>
-<p><strong>推送镜像到Docker Hub</strong></p>
-<p>需要在docker hub上注册账户,创建仓库</p>
-<p>登入docker</p>
-<pre><code class="language-shell">$ docker login 
-</code></pre>
-<p>修改标签</p>
-<pre><code class="language-shell">$ docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
-</code></pre>
-<p>推送</p>
-<pre><code class="language-shell">$ docker push username/repository:[tag]
-</code></pre>
-<p><strong>查看本地容器,镜像</strong></p>
-<pre><code class="language-shell">$ docker images
-$ docker ps -a
-</code></pre>
+                        <p><strong>leetcode</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//合并两个有序链表:https://leetcode-cn.com/problems/merge-two-sorted-lists/
+pub fn merge_two_lists(l1: Option&lt;Box&lt;ListNode&gt;&gt;, l2: Option&lt;Box&lt;ListNode&gt;&gt;) -&gt; Option&lt;Box&lt;ListNode&gt;&gt; {
+        match (l1, l2) {
+            (Some(n1), None) =&gt; Some(n1),
+            (None, Some(n2)) =&gt; Some(n2),
+
+            (Some(mut n1), Some(mut n2)) =&gt; {
+                if n1.val &lt; n2.val {
+                    let n = n1.next.take();
+                    n1.next = merge_two_lists(n, Some(n2));
+                    Some(n1)
+                } else {
+                    let n = n2.next.take();
+                    n2.next = merge_two_lists(Some(n1), n);
+                    Some(n2)
+                }
+            },
+            _ =&gt; None,
+        }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>match可以接受多个值.以元组形式存在</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="c2rust.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../daliy/7-4.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
+                                                    <a rel="next" href="../daliy/7-6.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
                         
                         <div style="clear: both"></div>
                     </nav>
@@ -187,10 +189,13 @@ $ docker ps -a
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="c2rust.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../daliy/7-4.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
+                                    <a rel="next" href="../daliy/7-6.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
                             </nav>
 
         </div>
@@ -203,13 +208,13 @@ $ docker ps -a
         </script>
         
         
-                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+                <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
         
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
         
