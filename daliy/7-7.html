@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>7.2</title>
+        <title>7.7</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html" class="active"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="../daliy/7-7.html"><strong aria-hidden="true">1.6.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="../daliy/7-8.html"><strong aria-hidden="true">1.7.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="../daliy/7-11.html"><strong aria-hidden="true">1.8.</strong> 7.11</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="../daliy/7-7.html" class="active"><strong aria-hidden="true">1.6.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="../daliy/7-8.html"><strong aria-hidden="true">1.7.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="../daliy/7-11.html"><strong aria-hidden="true">1.8.</strong> 7.11</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,66 +143,39 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="setp0------rust练习---a-hrefhttpsgithubcomrust-langrustlingsrustlingsafont"><a class="header" href="#setp0------rust练习---a-hrefhttpsgithubcomrust-langrustlingsrustlingsafont">setp0 ---- rust练习 -&gt; <a href="https://github.com/rust-lang/rustlings">rustlings</a></font></a></h1>
-<hr />
-<p><strong>AsRef&lt;T&gt;</strong></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>fn is_hello&lt;T: AsRef&lt;str&gt;&gt;(s: T) {
-   assert_eq!(&quot;hello&quot;, s.as_ref());
-}
-let s = &quot;hello&quot;;
-is_hello(s);
-<span class="boring">}
-</span></code></pre></pre>
-<p><strong>as_ref()</strong> 不能出错, 否则就需要用 <strong>Option<T> or a Result&lt;T,E&gt;</strong> 形式</p>
-<p></br> <br/>
-<strong>enmu match 组合</strong></p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>enum Message {
-    Move(Point),
-    Echo(String),
-    ChangeColor((u8, u8, u8)),
-    Quit,
-}
-fn process(&amp;mut self, message: Message) {
-    match message {
-        Message::Move(value) =&gt; {
-            self.move_position(value) 
-        }
-        Message::ChangeColor(value) =&gt; {
-            self.change_color(value) 
-        }
-        Message::Echo(value) =&gt;{
-            self.echo(value)
-        }
-        Message::Quit =&gt;{self.quit()}
-    }
-}
-<span class="boring">}
-</span></code></pre></pre>
-<p>其中<strong>value</strong>是枚举成员中包含的任意类型值, 如果枚举成员中有2个以上变量可用 <strong>( _, _, value)</strong> 形式提取任意变量</p>
-<p></br><br>
-<strong>main函数也可返回'Result'</strong></p>
-<pre><pre class="playground"><code class="language-rust">fn main() -&gt;Result&lt;(), E&gt;{
-    let cost = xxxxxxxxxxxxxx?;
-    Ok(())
-}
-</code></pre></pre>
-<p></br> <br/></p>
+                        <h1 id="操作系统多核支持"><a class="header" href="#操作系统多核支持">操作系统多核支持</a></h1>
+<p>在intel手册8.4 MULTIPLE-PROCESSOR (MP) INITIALIZATION 可查到多核启动相关信息.</p>
+<font size = 3> 
+8.4.1 BSP and AP Processors
+The MP initialization protocol defines two classes of processors: the bootstrap processor (BSP) and the application
+processors (APs). Following a power-up or RESET of an MP system, system hardware dynamically selects one of the
+processors on the system bus as the BSP. The remaining processors are designated as APs.
+As part of the BSP selection mechanism, the BSP flag is set in the IA32_APIC_BASE MSR (see Figure 10-5) of the
+BSP, indicating that it is the BSP. This flag is cleared for all other processors.
+The BSP executes the BIOS’s boot-strap code to configure the APIC environment, sets up system-wide data structures, and starts and initializes the APs. When the BSP and APs are initialized, the BSP then begins executing the
+operating-system initialization code.
+</font>
+<br></br>
+<font size = 3> 
+Following a power-up or reset, the APs complete a minimal self-configuration, then wait for a startup signal (a SIPI
+message) from the BSP processor. Upon receiving a SIPI message, an AP executes the BIOS AP configuration code,
+which ends with the AP being placed in halt state.
+For Intel 64 and IA-32 processors supporting Intel Hyper-Threading Technology, the MP initialization protocol treats
+each of the logical processors on the system bus or coherent link domain as a separate processor (with a unique
+APIC ID). During boot-up, one of the logical processors is selected as the BSP and the remainder of the logical
+processors are designated as APs.
+</font>
+<p>在启动时候.会选出一个核作为BSP. 同时设置其他核(APs)的flag信息.然后由BSP来执行初始化其他核(APs). 当BSP和APs都初始化完成后,由BSP来执行系统初始化代码</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../c2rust.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../daliy/7-6.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="../daliy/7-3.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="../daliy/7-8.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -212,11 +185,11 @@ fn process(&amp;mut self, message: Message) {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../c2rust.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../daliy/7-6.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="../daliy/7-3.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="../daliy/7-8.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
