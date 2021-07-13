@@ -144,8 +144,8 @@
                 <div id="content" class="content">
                     <main>
                         <p><strong>学习多核启动支持</strong></p>
-<p><strong>参考已有的实现</strong>
-主要看链接脚本中指定的入口汇编代码,以及接下来跳转到的代码</p>
+<p><strong>参考已有的实现</strong></p>
+<p>主要看链接脚本中指定的入口汇编代码,以及接下来跳转到的代码</p>
 <p>1.rcore</p>
 <pre><code class="language-x86asm">    .section .text.entry
     .globl _start
@@ -191,11 +191,11 @@ addi    t0, t0, %lo(address)
 <p>有了这个基础这段代码就好理解了
 为当前核心设置一个栈,地址为:sp = bootstack + (hartid + 1) * 0x10000
 再跳转到rust_main....</p>
-<pre><code>
-next:
-
-```rust
-#[no_mangle]
+<p><strong>next:</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[no_mangle]
 pub extern &quot;C&quot; fn rust_main(hartid: usize, device_tree_paddr: usize) -&gt; ! {
     let device_tree_vaddr = phys_to_virt(device_tree_paddr);
 
@@ -244,7 +244,29 @@ fn others_main(hartid: usize) -&gt; ! {
     info!(&quot;Hello RISCV! in hart {}&quot;, hartid);
     crate::kmain();
 }
-</code></pre>
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>rust_main的多核处理</strong></p>
+<p>1.设置thread_pointer为hartid</p>
+<p>2.首先让hartid = BOOT_HART_ID执行完rust_main,同时如果其他hart进入到此函数则循环等待.直到BST(boot_hart)执行启动代码,并设置原子操作操作AP_CAN_INIT.store(true, Ordering::Relaxed)后,再执行其他hart的初始化操作.</p>
+<p>这里用到了rust中的atomic基本用法如下:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::atomic::{AtomicBool, Ordering};
+let some_bool = AtomicBool::new(true);
+some_bool.store(false, Ordering::Relaxed);
+assert_eq!(some_bool.load(Ordering::Relaxed), false);
+<span class="boring">}
+</span></code></pre></pre>
+<table><td bgcolor=#EFF5FF>
+申请一个原子型bool变量初始化为true. AtomicBool::new(true)
+<p>load(Ordering::Relaxed)来获得变量值</p>
+<p>store(false, Ordering::Relaxed)来改变值</p>
+</td></table>
+<p><strong>多核启动概括</strong></p>
+<p>1.让主核(BST)执行完启动代码.同时设置原子操作让其他核等待.然后执行其他核(AP)的启动代码.</p>
+<p>2.为每个核设置好栈</p>
 
                     </main>
 
