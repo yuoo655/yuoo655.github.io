@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>7.4</title>
+        <title>7.13</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html" class="active"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="../daliy/7-7.html"><strong aria-hidden="true">1.6.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="../daliy/7-8.html"><strong aria-hidden="true">1.7.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="../daliy/7-10.html"><strong aria-hidden="true">1.8.</strong> 7.9-7.10</a></li><li class="chapter-item expanded "><a href="../daliy/7-11.html"><strong aria-hidden="true">1.9.</strong> 7.11</a></li><li class="chapter-item expanded "><a href="../daliy/7-13.html"><strong aria-hidden="true">1.10.</strong> 7.13</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="../daliy/7-7.html"><strong aria-hidden="true">1.6.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="../daliy/7-8.html"><strong aria-hidden="true">1.7.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="../daliy/7-10.html"><strong aria-hidden="true">1.8.</strong> 7.9-7.10</a></li><li class="chapter-item expanded "><a href="../daliy/7-11.html"><strong aria-hidden="true">1.9.</strong> 7.11</a></li><li class="chapter-item expanded "><a href="../daliy/7-13.html" class="active"><strong aria-hidden="true">1.10.</strong> 7.13</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,121 +143,127 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p><strong>setp0-3.2</strong></p>
-<p>3.2要求:用rust实现c语言例子</p>
-<p><strong>总结</strong>:c语言中指针的一些使用往往在rust中没有特别好的对应,这时候最好更改数据结构,操作方式来达到相同功能.</p>
-<p>不能很好对应的情形有:</p>
-<p>1.用指针做索引</p>
-<p>2.if (某指针) 等做判断</p>
-<p><strong>例:</strong></p>
-<pre><code class="language-c">#include &lt;stdio.h&gt;
-
-int main(int argc, char *argv[])
-{
-    // create two arrays we care about
-    int ages[] = {23, 43, 12, 89, 2};
-    char *names[] = {
-        &quot;Alan&quot;, &quot;Frank&quot;,
-        &quot;Mary&quot;, &quot;John&quot;, &quot;Lisa&quot;
-    };
-    // safely get the size of ages
-    int count = sizeof(ages) / sizeof(int);
-    int i = 0;
-    // first way using indexing
-    for(i = 0; i &lt; count; i++) {
-        printf(&quot;%s has %d years alive.\n&quot;,
-                names[i], ages[i]);
-    }
-    // setup the pointers to the start of the arrays
-    int *cur_age = ages;
-    char **cur_name = names;
-    // second way using pointers
-    for(i = 0; i &lt; count; i++) {
-        printf(&quot;%s is %d years old.\n&quot;,
-                *(cur_name+i), *(cur_age+i));
-    }
-    // third way, pointers are just arrays
-    for(i = 0; i &lt; count; i++) {
-        printf(&quot;%s is %d years old again.\n&quot;,
-                cur_name[i], cur_age[i]);
-    }
-    // fourth way with pointers in a stupid complex way
-    for(cur_name = names, cur_age = ages;
-            (cur_age - ages) &lt; count;
-            cur_name++, cur_age++)
-    {
-        printf(&quot;%s lived %d years so far.\n&quot;,
-                *cur_name, *cur_age);
-    }
-    return 0;
+                        <p><strong>中断具体实现</strong></p>
+<p><strong>整理下中断操作相关的csr寄存器</strong></p>
+<blockquote>
+<p><strong>sepc</strong>:发生异常的指令的pc被存入sepc. 我们需要读取他来获得bug信息.</p>
+<p><strong>stvec</strong>:riscv处理器trap后跳入的PC地址由一个叫做机器模式异常入口基地址寄存器mtvec的csr寄存器指定. mtvec是一个可读可写的寄存器, 软件可以编程设定它的值.在S模式下用到的寄存器即为stvec.我们需要用写stvec来跳转到中断处理代码.trap.asm中的__alltraps处</p>
+<p><strong>scaues</strong>:它会记录中断发生的原因, 需要用读取该寄存器来根据不同类型中断执行不同处理代码</p>
+<p><strong>sstatus</strong>:需要设置它的sie位来使能中断</p>
+</blockquote>
+<p><strong>如何读写csr寄存器</strong></p>
+<p>读写satp寄存器为例:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn read() -&gt; usize {
+    let ret: usize;
+    unsafe {llvm_asm!(&quot;csrr $0, satp&quot;:&quot;=r&quot;(ret):::&quot;volatile&quot;);}
+    ret
 }
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub unsafe fn write(x: usize) {
+    llvm_asm!(&quot;csrw satp, $0&quot;::&quot;r&quot;(x)::&quot;volatile&quot;);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>初始化中断</strong></p>
+<p>在处理器的程序执行过程中,一旦发生异常,则终止当前的程序流,处理器被强行跳转到一个新的PC地址。</p>
+<p>在riscv中S态该地址由stvec指定stvec低2位位mode域,高30位是base域.</p>
+<p>当<strong>MODE</strong>=0，设置为 Direct 模式时，则所有的异常响应时处理器均跳转到base值指示的pc地址。</p>
+<p>当<strong>MODE=1</strong>时，设置为 Vectored 模式时，遇到中断我们会进行跳转如下：PC-&gt;BASE + 4 x cause。而这样，我们只需将各中断处理程序放在正确的位置，并设置好 stvec ，遇到中断的时候硬件根据中断原因就会自动跳转到对应的中断处理程序了</p>
+<p>在此我们选择Direct模式.跳转到统一地址进行处理</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn init() {
+    unsafe {
+        extern &quot;C&quot; {
+            fn __alltraps();
+        }
+        //设置trap跳转到统一地址 __alltraps处
+        println!(&quot;trap init--------------&quot;);
+        stvec::write(__alltraps as usize);
+        sstatus::set_sie();
+    }
+    println!(&quot;++++ setup interrupt! ++++&quot;);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>stvec</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[inline]
+pub unsafe fn _write(x: usize) {
+    llvm_asm!(&quot;csrw stvec, $0&quot;::&quot;r&quot;(x)::&quot;volatile&quot;);
+}
+//0为设置成Direct模式
+#[inline]
+pub unsafe fn write(addr: usize) {
+    _write(addr + 0 as usize);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>sstatus</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>const SIE: usize = 1 &lt;&lt; 1;  // supervisor interrupt enable
+#[inline]
+pub fn write(x: usize) {
+    unsafe {llvm_asm!(&quot;csrw sstatus, $0&quot;::&quot;r&quot;(x)::&quot;volatile&quot;);}
+}
+
+#[inline]
+pub fn read() -&gt; usize {
+    let ret: usize;
+    unsafe {llvm_asm!(&quot;csrr $0, sstatus&quot;:&quot;=r&quot;(ret):::&quot;volatile&quot;);}
+    ret
+}
+
+#[inline]
+pub fn set_sie() {
+    write(read() | SIE);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>__alltrap</strong></p>
+<pre><code class="language-x86asm">__alltraps:
+    csrrw sp, sscratch, sp       交换用户栈和内核栈
+    addi sp, sp, -34*8           在内核栈上分配一个trapcontext大小的栈帧
+    
 </code></pre>
-<p>如果生硬翻译成rust</p>
-<pre><pre class="playground"><code class="language-rust">use std::mem::*;
-
-fn main() {
-
-    let mut ages = [23,43,12,89,2];
-    let mut names = [&quot;Alan&quot;, &quot;Frank&quot;,&quot;Mary&quot;, &quot;John&quot;, &quot;Lisa&quot;];
-
-    let count = size_of_val(&amp;ages) / size_of::&lt;i32&gt;();
-    // let count = ages.len();
-
-    for i in 0..count {
-        println!(&quot;{} has {} years alive.&quot;,names[i], ages[i]);
-    }
-    println!(&quot;----\n&quot;);
-    let cur_age = ages.as_mut_ptr();
-    let cur_name = names.as_mut_ptr();
-    
-    for i in 0..count{
-        unsafe {
-            println!(&quot;{} is {} years old.&quot;, 
-            *cur_name.offset(i as isize), 
-            *cur_age.offset(i as isize));
-        }
-    }
-    println!(&quot;----\n&quot;);
-
-    unsafe { 
-        let cur_age1 = core::slice::from_raw_parts_mut(ages.as_ptr() as *mut i32, count);
-        for i in 0..count{
-            println!(&quot;xxxx is {} years old.&quot;,  cur_age1[i])
-        }
-    }
-    
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[repr(C)]
+pub struct TrapContext {
+    // 32个通用寄存器 
+    pub x: [usize; 32], 
+    // 几个相关csr寄存器
+    pub sstatus: usize,
+    pub sepc: usize,
+    pub stval: usize,
+    pub scause: usize,
+    //共需(32+4)*8的栈空间
 }
-</code></pre></pre>
-<p>目前收集到的方法有:</p>
-<p>1.得到一个可对数据进行修改的指针  然后以字节单位计算偏移量.不能超过isize大小.来达到索引</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>let cur_age = ages.as_mut_ptr()   
-*cur_name.offset(i as isize)      
 <span class="boring">}
 </span></code></pre></pre>
-<p>2.得到一个i32类型长度为count类型的slice.可以理解为固定大小数组.</p>
-<p>此方法对字符串数组无效...可能原因:字符串大小不固定.无法准确计算大小??</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>from_raw_parts_mut(ages.as_ptr() as *mut i32, count)
-<span class="boring">}
-</span></code></pre></pre>
-<p><strong>更多有关原始指针可查阅官方文档</strong>:<a href="https://doc.rust-lang.org/std/primitive.pointer.html#method.offset">https://doc.rust-lang.org/std/primitive.pointer.html#method.offset</a></p>
-<p>该文档第一句话<strong>Working with raw pointers in Rust is uncommon, typically limited to a few patterns.</strong></p>
-<p>在有替代方法时候还是建议避免使用.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../daliy/7-3.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../daliy/7-11.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="../daliy/7-5.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="../c2rust.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -267,11 +273,11 @@ fn main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../daliy/7-3.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../daliy/7-11.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="../daliy/7-5.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="../c2rust.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
