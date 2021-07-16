@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>7.13</title>
+        <title>7.14</title>
                 
 
         <!-- Custom HTML head -->
@@ -82,7 +82,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="../daliy/7-7.html"><strong aria-hidden="true">1.6.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="../daliy/7-8.html"><strong aria-hidden="true">1.7.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="../daliy/7-10.html"><strong aria-hidden="true">1.8.</strong> 7.9-7.10</a></li><li class="chapter-item expanded "><a href="../daliy/7-11.html"><strong aria-hidden="true">1.9.</strong> 7.11</a></li><li class="chapter-item expanded "><a href="../daliy/7-13.html" class="active"><strong aria-hidden="true">1.10.</strong> 7.13</a></li><li class="chapter-item expanded "><a href="../daliy/7-14.html"><strong aria-hidden="true">1.11.</strong> 7.14</a></li><li class="chapter-item expanded "><a href="../daliy/7-15.html"><strong aria-hidden="true">1.12.</strong> 7.15</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">开始之前</a></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="../daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="../daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="../daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li><li class="chapter-item expanded "><a href="../daliy/7-6.html"><strong aria-hidden="true">1.5.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="../daliy/7-7.html"><strong aria-hidden="true">1.6.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="../daliy/7-8.html"><strong aria-hidden="true">1.7.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="../daliy/7-10.html"><strong aria-hidden="true">1.8.</strong> 7.9-7.10</a></li><li class="chapter-item expanded "><a href="../daliy/7-11.html"><strong aria-hidden="true">1.9.</strong> 7.11</a></li><li class="chapter-item expanded "><a href="../daliy/7-13.html"><strong aria-hidden="true">1.10.</strong> 7.13</a></li><li class="chapter-item expanded "><a href="../daliy/7-14.html" class="active"><strong aria-hidden="true">1.11.</strong> 7.14</a></li><li class="chapter-item expanded "><a href="../daliy/7-15.html"><strong aria-hidden="true">1.12.</strong> 7.15</a></li></ol></li><li class="chapter-item expanded "><a href="../c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="../foo.html"><strong aria-hidden="true">3.</strong> 🚧 foo</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -143,245 +143,201 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p><strong>中断具体实现</strong></p>
-<p><strong>整理下中断操作相关的csr寄存器</strong></p>
-<blockquote>
-<p><strong>sepc</strong>:发生异常的指令的pc被存入sepc. 我们需要读取他来获得bug信息.</p>
-<p><strong>stvec</strong>:riscv处理器trap后跳入的PC地址由一个叫做机器模式异常入口基地址寄存器mtvec的csr寄存器指定. mtvec是一个可读可写的寄存器, 软件可以编程设定它的值.在S模式下用到的寄存器即为stvec.我们需要用写stvec来跳转到中断处理代码.trap.asm中的__alltraps处</p>
-<p><strong>scaues</strong>:它会记录中断发生的原因, 需要用读取该寄存器来根据不同类型中断执行不同处理代码</p>
-<p><strong>sstatus</strong>:需要设置它的sie位来使能中断</p>
-</blockquote>
-<p><strong>如何读写csr寄存器</strong></p>
-<p>读写satp寄存器为例:</p>
+                        <p><strong>运行应用程序</strong></p>
+<p><strong>将应用程序链接到内核</strong></p>
+<p>link_app.S</p>
+<pre><code class="language-x86asm">    .align 3
+    .section .data
+    .global _num_app
+_num_app:
+    .quad 3
+    .quad app_0_start
+    .quad app_1_start
+    .quad app_2_start
+    .quad app_2_end
+
+    .section .data
+    .global app_0_start
+    .global app_0_end
+app_0_start:
+    .incbin &quot;../user/target/riscv64gc-unknown-none-elf/release/00hello_world.bin&quot;
+app_0_end:
+
+    .section .data
+    .global app_1_start
+    .global app_1_end
+app_1_start:
+    .incbin &quot;../user/target/riscv64gc-unknown-none-elf/release/01store_fault.bin&quot;
+app_1_end:
+
+    .section .data
+    .global app_2_start
+    .global app_2_end
+app_2_start:
+    .incbin &quot;../user/target/riscv64gc-unknown-none-elf/release/02power.bin&quot;
+app_2_end:
+
+</code></pre>
+<p><strong>.incbin</strong></p>
+<table><tr><td bgcolor=#EFF5FF>
+The incbin directive includes file verbatim at the current location. You can control the search paths used with the -I command-line option (refer to Chapter 3 Command-Line Options). Quotation marks are required around file.
+<p>The skip argument skips a number of bytes from the start of the file. The count argument indicates the maximum number of bytes to read. Note that the data is not aligned in any way, so it is the user's responsibility to make sure that proper alignment is provided both before and after the incbin directive.</p>
+</td></tr></table>
+<p><strong>.quad</strong></p>
+<p>用来定义一个8字节. 地址为各个应用程序起始地址</p>
+<p>num_app_ptr[x] 来得到_num_app中定义的应用程序起始地址</p>
+<p>然后用copy_from_slice来实现类似memcpy的功能</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub fn read() -&gt; usize {
-    let ret: usize;
-    unsafe {llvm_asm!(&quot;csrr $0, satp&quot;:&quot;=r&quot;(ret):::&quot;volatile&quot;);}
-    ret
+</span>lazy_static! {
+    static ref APP_MANAGER: AppManager = AppManager {
+        inner: RefCell::new({
+            extern &quot;C&quot; { fn _num_app(); }
+            let num_app_ptr = _num_app as usize as *const usize;
+            let num_app = unsafe { num_app_ptr.read_volatile() };
+            let mut app_start: [usize; MAX_APP_NUM + 1] = [0; MAX_APP_NUM + 1];
+            let app_start_raw: &amp;[usize] = unsafe {
+                core::slice::from_raw_parts(num_app_ptr.add(1), num_app + 1)
+            };
+            app_start[..=num_app].copy_from_slice(app_start_raw);
+            AppManagerInner {
+                num_app,
+                current_app: 0,
+                app_start,
+            }
+        }),
+    };
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p>把应用程序的代码和数据存在了app_start的数组之后.然后利用trap返回在内核栈上压入设置好的栈
+riscv函数调用规定第一个参数放在a0中. 利用这点trap.asm 中 __trapret mv sp, a0  可以让我们压入我们设置好的栈
+栈设置:</p>
+<p>1.ssp设置为user</p>
+<p>2.sepc设置为应用程序入口地址</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>pub unsafe fn write(x: usize) {
-    llvm_asm!(&quot;csrw satp, $0&quot;::&quot;r&quot;(x)::&quot;volatile&quot;);
-}
-<span class="boring">}
-</span></code></pre></pre>
-<p><strong>初始化中断</strong></p>
-<p>在处理器的程序执行过程中,一旦发生异常,则终止当前的程序流,处理器被强行跳转到一个新的PC地址。</p>
-<p>在riscv中S态该地址由stvec指定stvec低2位位mode域,高30位是base域.</p>
-<p>当<strong>MODE</strong>=0，设置为 Direct 模式时，则所有的异常响应时处理器均跳转到base值指示的pc地址。</p>
-<p>当<strong>MODE=1</strong>时，设置为 Vectored 模式时，遇到中断我们会进行跳转如下：PC-&gt;BASE + 4 x cause。而这样，我们只需将各中断处理程序放在正确的位置，并设置好 stvec ，遇到中断的时候硬件根据中断原因就会自动跳转到对应的中断处理程序了</p>
-<p>在此我们选择Direct模式.跳转到统一地址进行处理</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn init() {
-    unsafe {
-        extern &quot;C&quot; {
-            fn __alltraps();
-        }
-        //设置trap跳转到统一地址 __alltraps处
-        println!(&quot;trap init--------------&quot;);
-        stvec::write(__alltraps as usize);
-        sstatus::set_sie();
+</span>impl TrapContext {
+    pub fn set_sp(&amp;mut self, sp: usize) { self.x[2] = sp; }
+    pub fn app_init_context(entry: usize, sp: usize) -&gt; Self {
+        let mut sstatus = sstatus::read();
+        sstatus.set_spp(SPP::User);
+        let mut cx = Self {
+            x: [0; 32],
+            sstatus,
+            sepc: entry,
+        };
+        cx.set_sp(sp);
+        cx
     }
-    println!(&quot;++++ setup interrupt! ++++&quot;);
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><strong>stvec</strong></p>
+<p>由于在 RISC-V 中栈是向下增长的, 栈顶地址 = 起始地址+栈大小</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>#[inline]
-pub unsafe fn _write(x: usize) {
-    llvm_asm!(&quot;csrw stvec, $0&quot;::&quot;r&quot;(x)::&quot;volatile&quot;);
-}
-//0为设置成Direct模式
-#[inline]
-pub unsafe fn write(addr: usize) {
-    _write(addr + 0 as usize);
+</span>impl KernelStack {
+    fn get_sp(&amp;self) -&gt; usize {
+        self.data.as_ptr() as usize + KERNEL_STACK_SIZE
+    }
+    pub fn push_context(&amp;self, cx: TrapContext) -&gt; &amp;'static mut TrapContext {
+        let cx_ptr = (self.get_sp() - core::mem::size_of::&lt;TrapContext&gt;()) as *mut TrapContext;
+        unsafe { *cx_ptr = cx; }
+        unsafe { cx_ptr.as_mut().unwrap() }
+    }
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p><strong>sstatus</strong></p>
+<p><strong>处理系统调用</strong></p>
+<p>系统调用:通过查riscv手册 Environment call from U-mode 为异常.异常号为8</p>
+<p>在traphandler中加入对系统调用处理</p>
+<p>通过读取scause的第64位来区分是中断还是异常, 然后视不同情况进行处理</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>const SIE: usize = 1 &lt;&lt; 1;  // supervisor interrupt enable
-#[inline]
-pub fn write(x: usize) {
-    unsafe {llvm_asm!(&quot;csrw sstatus, $0&quot;::&quot;r&quot;(x)::&quot;volatile&quot;);}
-}
-
-#[inline]
-pub fn read() -&gt; usize {
-    let ret: usize;
-    unsafe {llvm_asm!(&quot;csrr $0, sstatus&quot;:&quot;=r&quot;(ret):::&quot;volatile&quot;);}
-    ret
-}
-
-#[inline]
-pub fn set_sie() {
-    write(read() | SIE);
-}
-<span class="boring">}
-</span></code></pre></pre>
-<p><strong>__alltrap</strong></p>
-<pre><code class="language-x86asm">__alltraps:
-    csrrw sp, sscratch, sp       交换用户栈和内核栈
-    addi sp, sp, -34*8           在内核栈上分配一个trapcontext大小的栈帧
-    
-</code></pre>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>#[repr(C)]
-pub struct TrapContext {
-    // 32个通用寄存器 
-    pub x: [usize; 32], 
-    // 几个相关csr寄存器
-    pub sstatus: usize,
-    pub sepc: usize,
-    pub stval: usize,
-    pub scause: usize,
-    //共需(32+4)*8的栈空间
-}
-<span class="boring">}
-</span></code></pre></pre>
-<p><strong>trap.asm</strong></p>
-<pre><code class="language-x86asm">	.section .text
-	.globl __alltraps
-__alltraps:
-	SAVE_ALL
-	mv a0, sp
-	jal trap_handler
-
-	.globl __trapret
-__trapret:
-	RESTORE_ALL
-	sret
-
-.equ XLENB, 8
-.macro LOAD a1, a2
-	ld \a1, \a2*XLENB(sp)
-.endm
-
-.macro STORE a1, a2
-	sd \a1, \a2*XLENB(sp)
-.endm
-</code></pre>
-<p><strong>save_all和restore_all</strong></p>
-<pre><code class="language-x86asm">
-.macro SAVE_ALL
-	csrrw sp, sscratch, sp
-	addi sp, sp, -36*XLENB
-	STORE x1, 1
-	STORE x3, 3
-...
-    STORE x30, 30
-    STORE x31, 31
-
-	csrrw s0, sscratch, x0
-	csrr s1, sstatus
-	csrr s2, sepc
-	csrr s3, stval
-	csrr s4, scause
-	
-	STORE s0, 2
-	STORE s1, 32
-	STORE s2, 33
-	STORE s3, 34
-	STORE s4, 35
-.endm
-</code></pre>
-<pre><code class="language-x86asm">.macro RESTORE_ALL
-	LOAD s1, 32
-	LOAD s2, 33
-	andi s0, s1, 1 &lt;&lt; 8
-    csrw sstatus, s1
-    csrw sepc, s2
-	LOAD x1, 1
-	LOAD x3, 3
-...
-    LOAD x30, 30
-    LOAD x31, 31
-
-	LOAD x2, 2
-.endm
-</code></pre>
-<p>分别用ld和sd来保存通用寄存器.64位数据需要8字节空间存储.用寄存器编号*8(sp)来存放到trapcontext中相应位置去
-区分是从用户态中断还是从内核态中断.只需判断sp是否为0.sp!=0则是从用户态进入中断.sp=0则是从内核态进入中断.无需切换栈</p>
-<p>实现中断处理函数trap_handler</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
+</span>
+<span class="boring">fn main() {
 </span>#[no_mangle]
-pub unsafe fn trap_handler(tf: &amp;mut TrapContext) {
+pub unsafe fn trap_handler(tf: &amp;mut TrapContext) -&gt; &amp;mut TrapContext{
     let cause = scause::read().get_bits(0..15) as u64;
     let epc = sepc::read();
     // println!(&quot;trap: cause: {:#}, epc:{:#x}&quot;, cause, epc);
-    match cause {
-
-        3 =&gt; breakpoint(&amp;mut tf.sepc),
-        5 =&gt; super_timer(),
-        12 =&gt; page_fault(tf),
-        13 =&gt; page_fault(tf),
-        15 =&gt; page_fault(tf),
-        _ =&gt; println!(&quot;undefined trap!&quot;)
+    let tmp = scause::read().get_bit(63);
+    //tmp  区分中断还是异常
+    if tmp == true {
+        match cause {
+            _ =&gt; println!(&quot;undefined trap!&quot;)
+        }
+        tf
+    }else{
+        match cause {
+            2 =&gt; {
+                println!(&quot;[kernel] IllegalInstruction in application, core dumped.&quot;);
+                run_next_app();
+            }
+            3 =&gt; breakpoint(&amp;mut tf.sepc),
+            5 =&gt; super_timer(),
+            // 12 =&gt; page_fault(tf),
+            // 13 =&gt; page_fault(tf),
+            7 | 15 =&gt; {
+                println!(&quot;[kernel] PageFault in application, core dumped.&quot;);
+                run_next_app();
+            }   
+            8 =&gt; user_syscall(tf),
+            _ =&gt; println!(&quot;undefined Exception!&quot;)
+        }
+        tf
     }
 }
 <span class="boring">}
 </span></code></pre></pre>
-<p>1.打印出中断类型,以及触发中断指定的pc值.以便以后调试</p>
-<p>2.根据cause不同分别进行不同的处理</p>
+<p>最终得到预取结果~~</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>如果是断点则打印断点pc. 然后pc+2.执行下一条指令 (riscv64指定长度为4字节.原来应该是sepc+4.但是编译器的行为会压缩.所以修正为sepc+2)
-fn breakpoint(sepc: &amp;mut usize) {
-    println!(&quot;a breakpoint epc:0x{:x}&quot;, sepc);
-    *sepc += 2;
-}
-
-每次触发时钟中断TICKS+1.触发100次打印一次.
-fn super_timer() {
-    clock_set_next_event();
-    unsafe {
-        TICKS += 1;
-        if TICKS == 100 {
-            TICKS = 0;
-            println!(&quot;* 100 ticks *&quot;);
-        }
-    }
-}
-
-//page_fault
-fn page_fault(tf: &amp;mut TrapContext) {
-    let cause = scause::read().get_bits(0..15) as u64;
-    let epc = sepc::read();
-    println!(&quot;{:?} va = {:#x} instruction = {:#x}&quot;, cause, tf.stval, tf.sepc);
-    panic!(&quot;page fault!&quot;);
-}
-
+</span>++++ setup interrupt! ++++
+[kernel] num_app = 3
+[kernel] app_0 [0x80210654, 0x802119e4)
+[kernel] app_1 [0x802119e4, 0x80212e14)
+[kernel] app_2 [0x80212e14, 0x802143ac)
+[kernel] Loading app_0
+[kernel] Loading app_0 finished
+Hello, world!
+[kernel] IllegalInstruction in application, core dumped.
+[kernel] Loading app_1
+[kernel] Loading app_1 finished
+Into Test store_fault, we will insert an invalid store operation...
+Kernel should kill this application!
+[kernel] PageFault in application, core dumped.
+[kernel] Loading app_2
+[kernel] Loading app_2 finished
+3^10000=5079
+3^20000=8202
+3^30000=8824
+3^40000=5750
+3^50000=3824
+3^60000=8516
+3^70000=2510
+3^80000=9379
+3^90000=2621
+3^100000=2749
+Test power OK!
+[kernel] Application exited with code 0
+panicked at 'All applications completed!', src\batch.rs:61:13
 <span class="boring">}
 </span></code></pre></pre>
-<p>至此trap可以可以正常工作</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="../daliy/7-11.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="../daliy/7-13.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="../daliy/7-14.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="../daliy/7-15.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -391,11 +347,11 @@ fn page_fault(tf: &amp;mut TrapContext) {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="../daliy/7-11.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="../daliy/7-13.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="../daliy/7-14.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="../daliy/7-15.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
