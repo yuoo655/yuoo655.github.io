@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">开始之前</a></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 tutorial学习</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-6.html"><strong aria-hidden="true">2.1.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="daliy/7-7.html"><strong aria-hidden="true">2.2.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="daliy/7-8.html"><strong aria-hidden="true">2.3.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="daliy/7-10.html"><strong aria-hidden="true">2.4.</strong> 7.9-7.10</a></li><li class="chapter-item expanded "><a href="daliy/7-11.html"><strong aria-hidden="true">2.5.</strong> 7.11</a></li><li class="chapter-item expanded "><a href="daliy/7-13.html"><strong aria-hidden="true">2.6.</strong> 7.13</a></li><li class="chapter-item expanded "><a href="daliy/7-14.html"><strong aria-hidden="true">2.7.</strong> 7.14</a></li><li class="chapter-item expanded "><a href="daliy/7-15.html"><strong aria-hidden="true">2.8.</strong> 7.15</a></li><li class="chapter-item expanded "><a href="daliy/7-16.html"><strong aria-hidden="true">2.9.</strong> 7.16</a></li><li class="chapter-item expanded "><a href="daliy/7-17.html"><strong aria-hidden="true">2.10.</strong> 7.17</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">3.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="foo.html"><strong aria-hidden="true">4.</strong> 🚧 foo</a></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">开始之前</a></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">1.</strong> 🚧 rust学习记录</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-2.html"><strong aria-hidden="true">1.1.</strong> 7.2</a></li><li class="chapter-item expanded "><a href="daliy/7-3.html"><strong aria-hidden="true">1.2.</strong> 7.3</a></li><li class="chapter-item expanded "><a href="daliy/7-4.html"><strong aria-hidden="true">1.3.</strong> 7.4</a></li><li class="chapter-item expanded "><a href="daliy/7-5.html"><strong aria-hidden="true">1.4.</strong> 7.5</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">2.</strong> 🚧 tutorial学习</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="daliy/7-6.html"><strong aria-hidden="true">2.1.</strong> 7.6</a></li><li class="chapter-item expanded "><a href="daliy/7-7.html"><strong aria-hidden="true">2.2.</strong> 7.7</a></li><li class="chapter-item expanded "><a href="daliy/7-8.html"><strong aria-hidden="true">2.3.</strong> 7.8</a></li><li class="chapter-item expanded "><a href="daliy/7-10.html"><strong aria-hidden="true">2.4.</strong> 7.9-7.10 多核支持</a></li><li class="chapter-item expanded "><a href="daliy/7-11.html"><strong aria-hidden="true">2.5.</strong> 7.11</a></li><li class="chapter-item expanded "><a href="daliy/7-13.html"><strong aria-hidden="true">2.6.</strong> 7.13</a></li><li class="chapter-item expanded "><a href="daliy/7-14.html"><strong aria-hidden="true">2.7.</strong> 7.14</a></li><li class="chapter-item expanded "><a href="daliy/7-15.html"><strong aria-hidden="true">2.8.</strong> 7.15</a></li><li class="chapter-item expanded "><a href="daliy/7-16.html"><strong aria-hidden="true">2.9.</strong> 7.16</a></li><li class="chapter-item expanded "><a href="daliy/7-17.html"><strong aria-hidden="true">2.10.</strong> 7.17</a></li></ol></li><li class="chapter-item expanded "><a href="c2rust.html"><strong aria-hidden="true">3.</strong> 🚧 c2rust</a></li><li class="chapter-item expanded "><a href="foo.html"><strong aria-hidden="true">4.</strong> 🚧 foo</a></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -691,6 +691,89 @@ ENTRY(SYMBOL) :将符号SYMBOL的值设置成入口地址。</p>
 <p>OUTPUT(FILENAME) : 定义输出文件的名字</p>
 <p>SEARCH_DIR(PATH) ：定义搜索路径，</p>
 <p>OUTPUT_ARCH() : 设置输出文件的体系结构</p>
+<div style="break-before: page; page-break-before: always;"></div><p><strong>python生成链接脚本,以及用户程序build</strong></p>
+<p>多个用户程序build</p>
+<pre><code class="language-python">import os
+
+base_address = 0x80400000
+step = 0x20000
+linker = 'src/linker.ld'
+
+app_id = 0
+apps = os.listdir('src/bin')
+apps.sort()
+for app in apps:
+    app = app[:app.find('.')]
+    lines = []
+    lines_before = []
+    with open(linker, 'r') as f:
+        for line in f.readlines():
+            lines_before.append(line)
+            line = line.replace(hex(base_address), hex(base_address+step*app_id))
+            lines.append(line)
+    with open(linker, 'w+') as f:
+        f.writelines(lines)
+    os.system('cargo build --bin %s --release' % app)
+    print('[build.py] application %s start with address %s' %(app, hex(base_address+step*app_id)))
+    with open(linker, 'w+') as f:
+        f.writelines(lines_before)
+    app_id = app_id + 1
+
+</code></pre>
+<p><strong>生成bin文件...objcopy</strong></p>
+<pre><code class="language-python">import os
+
+base_address = 0x80400000
+step = 0x20000
+linker = 'src/linker.ld'
+
+app_id = 0
+apps = os.listdir('src/bin')
+apps.sort()
+
+for app in apps:
+    app = app.strip('.rs')
+    os.system('rust-objcopy --binary-architecture=riscv64 target/riscv64gc-unknown-none-elf/release/%s --strip-all -O binary  target/riscv64gc-unknown-none-elf/release/%s.bin'%(app,app))
+</code></pre>
+<p><strong>生成链接脚本link_app.S  目录下所有bin文件写进链接脚本</strong></p>
+<pre><code class="language-python">import os
+
+
+f = open('link_app.S', 'w')
+
+f.writelines(&quot;    .align 3\n&quot;)
+f.writelines(&quot;    .section .data\n&quot;)
+f.writelines(&quot;    .global _num_app\n&quot;)
+f.writelines(&quot;_num_app:\n&quot;)
+apps = os.listdir('target/riscv64gc-unknown-none-elf/release')
+num = 0
+
+bin_list = []
+for app in apps:
+    if 'bin' in app:
+        num += 1
+        bin_list.append(app)
+
+f.writelines(&quot;    .quad %s\n&quot; %len(bin_list))
+
+count  = 0
+for app in bin_list:
+    f.writelines(&quot;    .quad app_%s_start\n&quot; %count)
+    count += 1
+
+f.writelines(&quot;\n&quot;)
+
+f.writelines(&quot;    .section .data\n&quot;)
+f.writelines(&quot;    .global app_0_start\n&quot;)
+f.writelines(&quot;    .global app_0_end\n&quot;)
+
+for i in range(len(bin_list)):
+    f.writelines(&quot;app_%s_start:\n&quot; %i)
+    f.writelines(&quot;    .incbin \&quot;../test/target/riscv64gc-unknown-none-elf/release/%s\&quot;\n&quot; %bin_list[i])
+    f.writelines(&quot;app_%s_end:\n\n&quot; %i)
+    
+f.close()
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="操作系统多核支持"><a class="header" href="#操作系统多核支持">操作系统多核支持</a></h1>
 <p>在intel手册8.4 MULTIPLE-PROCESSOR (MP) INITIALIZATION 可查到多核启动相关信息.</p>
 <font size = 3> 
@@ -714,7 +797,6 @@ APIC ID). During boot-up, one of the logical processors is selected as the BSP a
 processors are designated as APs.
 </font>
 <p>在启动时候.会选出一个核作为BSP. 同时设置其他核(APs)的flag信息.然后由BSP来执行初始化其他核(APs). 当BSP和APs都初始化完成后,由BSP来执行系统初始化代码</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="78"><a class="header" href="#78">7.8</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><p><strong>学习多核启动支持</strong></p>
 <p><strong>参考已有的实现</strong></p>
 <p>主要看链接脚本中指定的入口汇编代码,以及接下来跳转到的代码</p>
