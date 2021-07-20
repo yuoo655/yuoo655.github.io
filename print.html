@@ -1903,6 +1903,7 @@ pub fn unmap(&amp;mut self, va:usize) {
 <span class="boring">}
 </span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><p><strong>debug</strong></p>
+<p>pa = va - 0xffffffff40000000</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -1932,6 +1933,66 @@ p1_index为2                            第2项在物理地址:0x80a2d010
 <p>x/10xg $addr  以64位一个单元来显示某地址内存中内容.</p>
 <p><strong>页表建立过程中有可能出错的地方:</strong></p>
 <p>1.指向下一级页表的页表项标志位设置错! 这时debug会发现给定va手动算总能在最后找到相应的物理页帧! 但是程序没法运行</p>
+<p><strong>rust小程序辅助计算页表相关信息</strong></p>
+<p>假设 pa = va - 0xffffffff40000000</p>
+<pre><pre class="playground"><code class="language-rust">use bit_field::*;
+
+pub fn next_level(pte:usize)  -&gt; usize {
+    let next_level_va = ((pte &gt;&gt;10)&lt;&lt;12) + 0xffffffff40000000 as usize;
+    println!(&quot;next level va 0x{:x}&quot;, next_level_va);
+    println!(&quot;next level pa level 0x{:x}&quot;, next_level_va - 0xffffffff40000000 as usize);
+
+    next_level_va
+}
+
+pub fn va_to_pa(va:usize){
+    println!(&quot;pa {:x}&quot;, va - 0xffffffff40000000);
+}
+
+pub fn page_index(va:usize){
+    println!(&quot;p1_index {:?}  p2_index {:?}  p3_index {:?}&quot;, va.get_bits(12..21), va.get_bits(21..30), va.get_bits(30..39) );
+}
+
+pub fn p1_entry(va:usize) -&gt; usize{
+    let satp = 0x80a2a000 as usize;
+    let p2_entry = (satp + 8*va.get_bits(12..21)) as usize ;
+    println!(&quot;p1_entry {:x}&quot;, p1_entry);
+    p2_entry
+}
+
+pub fn p2_entry(va:usize, p1_table:usize) -&gt; usize{
+    let satp = 0x80a2a000 as usize;
+    let p2_entry = (p1_table + 8*va.get_bits(21..30)) as usize ;
+    println!(&quot;p2_entry {:x}&quot;, p2_entry);
+
+    p2_entry
+}
+
+
+pub fn p3_entry(va:usize: p2_table:usize) -&gt; usize{
+    let satp = 0x80a2a000 as usize;
+    let p3_entry = (p2_table + 8*va.get_bits(30..39)) as usize ;
+    println!(&quot;p3_entry {:x}&quot;, p3_entry);
+
+    p3_entry
+}
+
+fn main() {
+    let va = 0xffffffffc02058de;
+    page_index(va);
+    
+
+    p1_entry = p1_entry(0xffffffffc02058de);
+    p2_table = next_level(p1_entry);
+
+    p2_entry = p2_entry(0xffffffffc02058de, p2_table);
+    p3_table = next_level(p2_entry);
+
+    p3_entry = p1_entry(0xffffffffc02058de, p3_table);
+
+}
+
+</code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
