@@ -2231,8 +2231,9 @@ pub fn write(&amp;mut self, buf: UserBuffer) -&gt; usize {
 <p><strong>文件系统</strong></p>
 <p>文件系统的几个组要部分:</p>
 <p>1.磁盘上的文件系统</p>
-<p>2.磁盘buffer</p>
+<p>2.磁盘块,在buffer中的磁盘块</p>
 <p>3.内存中的buffer</p>
+<p>(读写文件系统: 如果磁盘块在内存buffer中,就是通过读写内存, 然后调用驱动把内存中的数据读写入磁盘 or 同步, 如果磁盘块不在buffer中则需调用驱动直接读写磁盘)</p>
 <p>4.os上的具体文件系统</p>
 <p>5.os中的虚拟文件系统. 包装具体的文件系统</p>
 <p>6.文件系统驱动.  可采用ramdisk.用内存中的一段区间来模拟磁盘.</p>
