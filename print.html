@@ -2237,6 +2237,126 @@ pub fn write(&amp;mut self, buf: UserBuffer) -&gt; usize {
 <p>4.os上的具体文件系统</p>
 <p>5.os中的虚拟文件系统. 包装具体的文件系统</p>
 <p>6.文件系统驱动.  可采用ramdisk.用内存中的一段区间来模拟磁盘.</p>
+<p><strong>sys_open</strong></p>
+<p>调用一下open_file.设置标记位.</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn sys_open(path: *const u8, flags: u32) -&gt; isize {
+    let task = current_task().unwrap();
+    let token = current_user_token();
+    let path = translated_str(token, path);
+    if let Some(inode) = open_file(
+        path.as_str(),
+        OpenFlags::from_bits(flags).unwrap()
+    ) {
+        let mut inner = task.acquire_inner_lock();
+        let fd = inner.alloc_fd();
+        inner.fd_table[fd] = Some(inode);
+        fd as isize
+    } else {
+        -1
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>linkat</strong></p>
+<p>基本和create一样,只不过create需要alloc一个inode.这里需要找到inode</p>
+<p>调用find_inode_id找到inode_id.</p>
+<p>接下来参考Inode::create()中的写法. </p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>self.modify_disk_inode(|root_inode| {
+    // append file in the dirent
+    let file_count = (root_inode.size as usize) / DIRENT_SZ;
+    let new_size = (file_count + 1) * DIRENT_SZ;
+    // increase size
+    self.increase_size(new_size as u32, root_inode, &amp;mut fs);
+    // write dirent
+    let dirent = DirEntry::new(name, new_inode_id);
+    root_inode.write_at(
+        file_count * DIRENT_SZ,
+        dirent.as_bytes(),
+        &amp;self.block_device,
+    );
+});
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>self.linkat(|root_inode| {
+    let file_count = (root_inode.size as usize) / DIRENT_SZ;
+    let new_size = (file_count + 1) * DIRENT_SZ;
+    self.increase_size(new_size as u32, root_inode, &amp;mut fs);
+    let dirent = DirEntry::new(new_name, inode_id);
+    root_inode.write_at(
+        file_count * DIRENT_SZ,
+        dirent.as_bytes(),
+        &amp;self.block_device,
+    );
+});
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>unlinkat</strong></p>
+<p>和ls很像.ls需要列举目录下所有文件. unlinkat也需要遍历目录来找到指定文件</p>
+<p>ls:</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn ls(&amp;self) -&gt; Vec&lt;String&gt; {
+    let _fs_lock = self.fs.lock();
+    self.read_disk_inode(|disk_inode| {
+        let file_count = (disk_inode.size as usize) / DIRENT_SZ;
+        let mut v: Vec&lt;String&gt; = Vec::new();
+        for i in 0..file_count {
+            let mut dirent = DirEntry::empty();
+            assert_eq!(
+                disk_inode.read_at(
+                    i * DIRENT_SZ,
+                    dirent.as_bytes_mut(),
+                    &amp;self.block_device,
+                ),
+                DIRENT_SZ,
+            );
+            if dirent.inode_number() != 0 {
+                v.push(String::from(dirent.name()));
+            }
+        }
+        v
+    })
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>unlinkat</p>
+<p>如果文件名==name,则把当前文件写空.来实现unlink....</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn unlinkat(&amp;self, name: &amp;str) -&gt; isize {
+    let file_remove = |disk_inode: &amp;mut DiskInode| {
+        let file_count = (disk_inode.size as usize) / DIRENT_SZ;
+        let mut dirent = DirEntry::empty();
+        for i in 0..file_count {
+
+            disk_inode.read_at(DIRENT_SZ * i, dirent.as_bytes_mut(), &amp;self.block_device);
+
+            if dirent.name() == name {
+                disk_inode.write_at(
+                    DIRENT_SZ * i,
+                    DirEntry::empty().as_bytes_mut(),
+                    &amp;self.block_device,
+                );
+                return 0;
+            }
+        }
+        -1
+    };
+    self.modify_disk_inode(file_remove)
+}
+<span class="boring">}
+</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
