@@ -2030,7 +2030,28 @@ fn mmap(&amp;self, start: VirtAddr, end: VirtAddr,permission: MapPermission ){
 
 <span class="boring">}
 </span></code></pre></pre>
-<div style="break-before: page; page-break-before: always;"></div><p><strong>整理之前代码</strong></p>
+<div style="break-before: page; page-break-before: always;"></div><p><strong>ch5</strong></p>
+<p><strong>实现sys_spawn</strong></p>
+<p>由于tutori中没有实现内核线程(进程). 所以只能从当前进程中fork出来.再执行.</p>
+<p>拿到应用程序名字 -&gt; 从app_name获取应用程序地址 -&gt; get_app_data_by_name 接口中找到对应的ELF数据</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn sys_spawn(path: *const u8) -&gt; isize {
+    let path = translated_str(current_user_token(), path);
+    if let Some(data) = get_app_data_by_name(path.as_str()) {
+        let new_task = current_task().unwrap().fork();
+        new_task.exec(data);
+        let new_pid = new_task.pid.0;
+        add_task(new_task);
+        new_pid as isize
+    } else {
+        -1
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>整理之前代码</strong></p>
 <p>把用户程序和os放一个文件夹下管理. 配置vscode. 编写python脚本</p>
 <p>在主目录下运行python app_build.py 来生成用户程序,链接脚本</p>
 <p><strong>app_build.py</strong></p>
@@ -2148,27 +2169,6 @@ os.system('cd os &amp;&amp; rust-objcopy target/riscv64gc-unknown-none-elf/debug
 	]
 }
 </code></pre>
-<p><strong>ch5</strong></p>
-<p><strong>实现sys_spawn</strong></p>
-<p>由于tutori中没有实现内核线程(进程). 所以只能从当前进程中fork出来.再执行.</p>
-<p>拿到应用程序名字 -&gt; 从app_name获取应用程序地址 -&gt; get_app_data_by_name 接口中找到对应的ELF数据</p>
-<pre><pre class="playground"><code class="language-rust">
-<span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>pub fn sys_spawn(path: *const u8) -&gt; isize {
-    let path = translated_str(current_user_token(), path);
-    if let Some(data) = get_app_data_by_name(path.as_str()) {
-        let new_task = current_task().unwrap().fork();
-        new_task.exec(data);
-        let new_pid = new_task.pid.0;
-        add_task(new_task);
-        new_pid as isize
-    } else {
-        -1
-    }
-}
-<span class="boring">}
-</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><p><strong>ch6</strong></p>
 <p>加快节奏...没意识到原来速度有点慢..完全采用tutorial代码..</p>
 <p>设计mail. 现在需要一个所有进程共享的数据结构.参考KERNEL_STACK.设置一个全局的数据结构来来管理邮箱</p>
