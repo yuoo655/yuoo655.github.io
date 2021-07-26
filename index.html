@@ -150,7 +150,7 @@
 <tr><td></td><td></td><td>1 <br>(<a href="c2rust.html">C2RUST</a>)</td><td>2 <br>(<a href="daliy/7-2.html">D1</a>)</td><td>3 <br>(<a href="daliy/7-3.html">D2</a>)</td><td>4 <br>(<a href="daliy/7-4.html">D3</a>)</td><td>5 <br>(<a href="daliy/7-5.html">D4</a>)</td></tr>
 <tr><td>6<br>(<a href="daliy/7-6.html">D5</a>)</td><td>7 <br>(<a href="daliy/7-7.html">D6</a>)</td><td>8 <br>(<a href="daliy/7-8.html">D7</a>)</td><td>9  <br>(<a href="daliy/7-10.html">D9</a>)</td><td>10 <br> (<a href="daliy/7-10.html">D9</a>)</td><td>11 <br></td><td>12 <br></td></tr>
 <tr><td>13<br>(<a href="daliy/7-13.html">D12</a>)</td><td>14 <br>(<a href="daliy/7-14.html">D13</a>)</td><td>15 <br>(<a href="daliy/7-15.html">D14</a>)</td><td>16 <br>(<a href="daliy/7-16.html">D15</a>)</td><td>17 <br>(<a href="daliy/7-17.html">D16</a>)</td><td>18 <br>(<a href="daliy/7-18.html">D17</a>)</td><td>19<br>(<a href="daliy/7-18.html">D18</a>)</td></tr>
-<tr><td>20<br>(<a href="daliy/7-19.html">D19</a>)</td><td>21 <br>(<a href="daliy/7-20.html">D20</a>)</td><td>22 <br>(<a href="daliy/7-23.html">D22</a>)</td><td>23 <br>(<a href="daliy/7-23.html">D23</a>)</td><td>24 <br><br>(<a href="daliy/7-24.html">D24</a>)</td><td>25 <br></td><td>26 <br></td></tr>
+<tr><td>20<br>(<a href="daliy/7-19.html">D19</a>)</td><td>21 <br>(<a href="daliy/7-20.html">D20</a>)</td><td>22 <br>(<a href="daliy/7-23.html">D22</a>)</td><td>23 <br>(<a href="daliy/7-23.html">D23</a>)</td><td>24 <br>(<a href="daliy/7-24.html">D24</a>)</td><td>25 <br>(<a href="daliy/7-25.html">D25</a>)</td><td>26 <br></td></tr>
 <tr><td>27 <br></td><td>28 <br></td><td>29 <br></td><td>30 <br></td><td>31 <br></td><td></td><td></td></tr>
 </tbody></table>
 <p><strong>八月</strong></p>
@@ -187,6 +187,20 @@
 
         </div>
 
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
         
         
         
