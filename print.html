@@ -2547,6 +2547,43 @@ pub fn sys_read(fd: usize, base: *const u8, len: usize) -&gt; i64 {
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p><strong>app linker 编写</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>_app_names:
+    .string &quot;exit&quot;
+    .string &quot;user_shell&quot;
+<span class="boring">}
+</span></code></pre></pre>
+<p>start = _app_names. 直到读取到'\0' (有待确认这里是否是编译器自动加上了'\0')  之后用类似memcpy保存到&amp;str中</p>
+<p>_app_names按顺序保存在了一个vec中, 之后就可以用id来得到应用数据了</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>lazy_static! {
+    static ref APP_NAMES: Vec&lt;&amp;'static str&gt; = {
+        let num_app = get_num_app();
+        extern &quot;C&quot; { fn _app_names(); }
+        let mut start = _app_names as usize as *const u8;
+        let mut v = Vec::new();
+        unsafe {
+            for _ in 0..num_app {
+                let mut end = start;
+                while end.read_volatile() != '\0' as u8 {
+                    end = end.add(1);
+                }
+                let slice = core::slice::from_raw_parts(start, end as usize - start as usize);
+                let str = core::str::from_utf8(slice).unwrap();
+                v.push(str);
+                start = end.add(1);
+            }
+        }
+        v
+    };
+}
+<span class="boring">}
+</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
