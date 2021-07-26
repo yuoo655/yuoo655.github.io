@@ -2488,16 +2488,17 @@ enum SyscallId {
 pub fn sys_read(fd: usize, base: *const u8, len: usize) -&gt; i64 {
     sys_call(SyscallId::Read, fd, base as usize, len, 0)
 }
-<span class="boring">}
-</span></code></pre></pre>
-<p>包装下sys_read</p>
-<pre><code>pub fn getchar() -&gt; u8 {
+
+包装下sys_read
+
+pub fn getchar() -&gt; u8 {
     let mut c = [0u8; 1];
     read(STDIN, &amp;mut c);
     c[0]
 }
-</code></pre>
-<p>有了getchar()支持 我们就可以用一个loop来循环获得输入</p>
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>有了getchar()支持 我们就可以用一个loop来循环获得输入</strong></p>
 <p>这个输入存在哪里?</p>
 <p>这时就需要用户程序的动态内存分配. 和os内核中使用的一样,使用已经写好的库buddy_system_allocator</p>
 <p>这样我们就可以用String数据结构来存获得的输入</p>
@@ -2507,7 +2508,7 @@ pub fn sys_read(fd: usize, base: *const u8, len: usize) -&gt; i64 {
 </span>let mut line: String = String::new();
 <span class="boring">}
 </span></code></pre></pre>
-<p>在有了上面的支持后,需要做的就是匹配输入,然后调用exec来运行不同的程序</p>
+<p><strong>在有了上面的支持后,需要做的就是匹配输入,然后调用exec来运行不同的程序</strong></p>
 <p>采用match来匹配</p>
 <pre><pre class="playground"><code class="language-rust">pub fn main() -&gt; i32 {
     println!(&quot;Rust user shell&quot;);
