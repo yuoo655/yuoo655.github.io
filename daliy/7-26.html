@@ -143,7 +143,28 @@
 
                 <div id="content" class="content">
                     <main>
-                        <p><strong>统一的在线开发环境与os</strong></p>
+                        <p><strong>虚拟化</strong></p>
+<p>没有头绪.找了一篇有代码的论文看看先.</p>
+<p><a href="https://arxiv.org/pdf/2103.14951">A First Look at RISC-V Virtualization from anEmbedded Systems Perspective</a></p>
+<p>论文仓库:<a href="https://github.com/mit-pdos/RVirt">https://github.com/mit-pdos/RVirt</a></p>
+<p><strong>What Needs to be Virtualized?</strong></p>
+<p>1.Supervisor architectural state (i.e. CSRs)</p>
+<p>2.Memory</p>
+<p>3.I/O and Interrupts</p>
+<p><strong>Virtualizing Memory</strong></p>
+<p>Two-Level Address Translation</p>
+<p>-Original virtual addresses translated to guest physical addresses by VS-level page table</p>
+<p>-Guest physical addresses translated to machine physical addresses by HS-level page table</p>
+<p>Same page-table entry format as S-mode</p>
+<p>Same page-table layouts as S-mode (Sv32, 39, 48, ...)</p>
+<p><strong>Virtualizing I/O and Interrupts</strong></p>
+<p>Software &amp; Timer interrupts use SBI (=&gt; trivial)</p>
+<p>Use two-level paging scheme to trap MMIO accesses </p>
+<p>-Sufficient to emulate PLIC and other MMIO devices</p>
+<p>Could avoid extra traps into hypervisor with virtualization</p>
+<p>-aware PLIC-Platform issue, outside scope of hypervisor ISA</p>
+<p>Need I/O MMU to initiate DMAs without trap into hypervisor</p>
+<p>-Platform issue, outside scope of hypervisor ISA</p>
 
                     </main>
 
