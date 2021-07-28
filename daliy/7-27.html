@@ -154,10 +154,12 @@
 <p>2.user运行(complier[1,2,3],debugger[1,2,3],emulator[1,2,3])的组合</p>
 <p>3.user能获得complier debugger emulator的执行结果</p>
 <p>4.manager管理user[1,2,3]. 并且支持 创建 删除 切换user.</p>
+<p><strong>抽象</strong></p>
 <p>manager --&gt; container</p>
 <p>(complier[1,2,3],debugger[1,2,3],emulator[1,2,3])组合  --&gt; namespace</p>
-<p>这么看manager为一个特殊的进程</p>
 <p>对user可以使用的系统资源做限制---&gt;cgroup</p>
+<p>这么看manager(container)为一个特殊的进程管理着一个进程组合. </p>
+<p>cgroup管理进程组可使用的资源</p>
 
                     </main>
 
