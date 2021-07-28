@@ -150,10 +150,14 @@
 <p>debugger[1,2,3]</p>
 <p>emulator[1,2,3]</p>
 <p><strong>目标</strong></p>
-<p>1.user[1,2,3]拥有独立的磁盘空间,运行互不干扰</p>
-<p>2.user运行complier,debugger,emulator[1,2,3]随机组合,</p>
+<p>1.user[1,2,3]拥有独立的磁盘空间,运行互不干扰,也感知不到对方</p>
+<p>2.user运行(complier[1,2,3],debugger[1,2,3],emulator[1,2,3])的组合</p>
 <p>3.user能获得complier debugger emulator的执行结果</p>
 <p>4.manager管理user[1,2,3]. 并且支持 创建 删除 切换user.</p>
+<p>manager --&gt; container</p>
+<p>(complier[1,2,3],debugger[1,2,3],emulator[1,2,3])组合  --&gt; namespace</p>
+<p>这么看manager为一个特殊的进程</p>
+<p>对user可以使用的系统资源做限制---&gt;cgroup</p>
 
                     </main>
 
