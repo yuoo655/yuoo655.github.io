@@ -2610,14 +2610,14 @@ pub fn getchar() -&gt; u8 {
 <div style="break-before: page; page-break-before: always;"></div><p><strong>虚拟化层次</strong>
 <img src="daliy/./../Virtualization.png" alt="avatar" /></p>
 <p><strong>简单在线开发环境模型</strong></p>
-<p>complier</p>
-<p>debugger</p>
-<p>emulator </p>
+<p>complier[1,2,3]</p>
+<p>debugger[1,2,3]</p>
+<p>emulator[1,2,3]</p>
 <p><strong>目标</strong></p>
-<p>1.user1和user2 有独立的磁盘空间. user1运行不能干扰user2  user1不能访问user2的文件</p>
-<p>2.complier debugger emulator能执行user1和user2下的文件. </p>
-<p>3.user1和user2能获得complier debugger emulator的执行结果</p>
-<p>4.manager管理user1和user2. 并且支持 创建 删除 切换user.</p>
+<p>1.user[1,2,3]拥有独立的磁盘空间,运行互不干扰</p>
+<p>2.user运行complier,debugger,emulator[1,2,3]随机组合,</p>
+<p>3.user能获得complier debugger emulator的执行结果</p>
+<p>4.manager管理user[1,2,3]. 并且支持 创建 删除 切换user.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
