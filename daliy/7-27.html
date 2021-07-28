@@ -143,7 +143,15 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="727"><a class="header" href="#727">7.27</a></h1>
+                        <p><strong>简单在线开发环境模型</strong></p>
+<p>complier</p>
+<p>debugger</p>
+<p>emulator </p>
+<p><strong>目标</strong></p>
+<p>1.user1和user2 有独立的磁盘空间. user1运行不能干扰user2  user1不能访问user2的文件</p>
+<p>2.complier debugger emulator能执行user1和user2下的文件. </p>
+<p>3.user1和user2能获得complier debugger emulator的执行结果</p>
+<p>4.manager管理user1和user2. 并且支持 创建 删除 切换user.</p>
 
                     </main>
 
@@ -174,20 +182,6 @@
 
         </div>
 
-                <!-- Livereload script (if served using the cli tool) -->
-        <script type="text/javascript">
-            var socket = new WebSocket("ws://localhost:3000/__livereload");
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
         
         
         

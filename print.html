@@ -2346,7 +2346,7 @@ pub fn write(&amp;mut self, buf: UserBuffer) -&gt; usize {
 <p>1.磁盘上的文件系统</p>
 <p>2.磁盘块,在buffer中的磁盘块</p>
 <p>3.内存中的buffer</p>
-<p>(读写文件系统: 如果磁盘块在内存buffer中,就是通过读写内存, 然后调用驱动把内存中的数据读写入磁盘 or 同步, 如果磁盘块不在buffer中则需调用驱动直接读写磁盘)</p>
+<p>(读写文件系统: 如果磁盘块在内存buffer中,就是直接读写内存, 如果磁盘块不在buffer中则需调用驱动直接读写磁盘并填入buffer中.)</p>
 <p>4.os上的具体文件系统</p>
 <p>5.os中的虚拟文件系统. 包装具体的文件系统</p>
 <p>6.文件系统驱动.  可采用ramdisk.用内存中的一段区间来模拟磁盘.</p>
@@ -2607,7 +2607,15 @@ pub fn getchar() -&gt; u8 {
 <p>-aware PLIC-Platform issue, outside scope of hypervisor ISA</p>
 <p>Need I/O MMU to initiate DMAs without trap into hypervisor</p>
 <p>-Platform issue, outside scope of hypervisor ISA</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="727"><a class="header" href="#727">7.27</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><p><strong>简单在线开发环境模型</strong></p>
+<p>complier</p>
+<p>debugger</p>
+<p>emulator </p>
+<p><strong>目标</strong></p>
+<p>1.user1和user2 有独立的磁盘空间. user1运行不能干扰user2  user1不能访问user2的文件</p>
+<p>2.complier debugger emulator能执行user1和user2下的文件. </p>
+<p>3.user1和user2能获得complier debugger emulator的执行结果</p>
+<p>4.manager管理user1和user2. 并且支持 创建 删除 切换user.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
@@ -2787,20 +2795,6 @@ $ docker ps -a
 
         </div>
 
-                <!-- Livereload script (if served using the cli tool) -->
-        <script type="text/javascript">
-            var socket = new WebSocket("ws://localhost:3000/__livereload");
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
         
         
         
