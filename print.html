@@ -2618,12 +2618,9 @@ pub fn getchar() -&gt; u8 {
 <p>2.user运行(complier[1,2,3],debugger[1,2,3],emulator[1,2,3])的组合</p>
 <p>3.user能获得complier debugger emulator的执行结果</p>
 <p>4.manager管理user[1,2,3]. 并且支持 创建 删除 切换user.</p>
-<p><strong>抽象</strong></p>
-<p>manager --&gt; container</p>
-<p>(complier[1,2,3],debugger[1,2,3],emulator[1,2,3])组合  --&gt; namespace</p>
-<p>对user可以使用的系统资源做限制---&gt;cgroup</p>
-<p>这么看manager(container)为一个特殊的进程管理着一个进程组合. </p>
-<p>cgroup管理进程组可使用的资源</p>
+<p>linux namespace cgroup</p>
+<p>namesapce: 安全隔离  (MNT, UTS, IPC, PID, NET, User, Cgroup)</p>
+<p>cgroup: 性能隔离 (task, cgroup, subsystem, hierarchy)</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
