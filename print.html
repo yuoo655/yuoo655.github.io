@@ -2828,6 +2828,8 @@ User exit!
 <p>主要完成了tiny_kernel在内核中的映射.  暂时没有完成tiny_kernel在用户空间中的映射</p>
 <p>用户程序可以通过系统调用让内核来执行tiny_kernel</p>
 <p>v1是一个最小化内核只能输出一些东西,可单独编译,改变linker中的entry地址和syscall为sbicall可以成为一个独立的内核</p>
+<p>未来v1中将有一个库以函数调用的形式供其他用户程序使用,结合用户态中断,可将ecall(需要拓展语义)分发给v1,赋予v1更多功能</p>
+<p>v1将自己无法处理的情况再通过ecall转交给内核</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
