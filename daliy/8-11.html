@@ -143,7 +143,10 @@
 
                 <div id="content" class="content">
                     <main>
-                        <hr />
+                        <p><strong>初步设计</strong></p>
+<p>tiny_kernel是多线程程序,所有人共享地址空间(单页表下的内核),没有内存管理(由上级kernel完成),有进程线程管理,结合用户态中断</p>
+<p>通过拓展ecall语义来使得用户进程下的任务可以 ecall 进入tiny_kernel,tiny_kernel选择执行下一个任务.</p>
+<p>tiny_kernel在内核以及用户空间中的固定位置</p>
 
                     </main>
 

@@ -2820,7 +2820,10 @@ User exit!
 <span class="boring">}
 </span></code></pre></pre>
 <p><strong>最终async-read block完成 输出结果</strong></p>
-<div style="break-before: page; page-break-before: always;"></div><hr />
+<div style="break-before: page; page-break-before: always;"></div><p><strong>初步设计</strong></p>
+<p>tiny_kernel是多线程程序,所有人共享地址空间(单页表下的内核),没有内存管理(由上级kernel完成),有进程线程管理,结合用户态中断</p>
+<p>通过拓展ecall语义来使得用户进程下的任务可以 ecall 进入tiny_kernel,tiny_kernel选择执行下一个任务.</p>
+<p>tiny_kernel在内核以及用户空间中的固定位置</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录-2"><a class="header" href="#-rust学习记录-2">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现-2">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
