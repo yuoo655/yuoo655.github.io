@@ -147,6 +147,49 @@
 <p>tiny_kernel是多线程程序,所有人共享地址空间(单页表下的内核),没有内存管理(由上级kernel完成),有进程线程管理,结合用户态中断</p>
 <p>通过拓展ecall语义来使得用户进程下的任务可以 ecall 进入tiny_kernel,tiny_kernel选择执行下一个任务.</p>
 <p>tiny_kernel在内核以及用户空间中的固定位置</p>
+<p><strong>so far------------</strong></p>
+<p>主要完成了tiny_kernel在内核中的映射.  暂时没有完成tiny_kernel在用户空间中的映射</p>
+<p>用户程序可以通过系统调用让内核来执行tiny_kernel</p>
+<p>v1是一个最小化内核只能输出一些东西</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>[kernel] Hello, world!
+last 31684 Physical Frames.
+.text [0x80200000, 0x80217000)
+.rodata [0x80217000, 0x8021d000)
+.data [0x8021d000, 0x8022b000)
+.bss [0x8022b000, 0x8043c000)
+mapping .text section
+mapping .rodata section
+mapping .data section
+mapping .bss section
+mapping physical memory
+mapping memory-mapped registers
+remap_test passed!
+loader list app
+/**** APPS ****
+v1
+**************/
+/**** APPS ****
+initproc
+usertests
+hello_world
+user_shell
+tiny
+**************/
+Rust user shell
+&gt;&gt; hello_world
+Hello world from user mode program!
+Hello world switch to v1
+Hello, world! from v1
+v1 stext 80400000 etext 80403000
+Shell: Process 2 exited with code 0
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>to do</strong></p>
+<p>1.在用户空间映射tiny_kernel使得用户进程可以不通过内核访问tiny_kernel</p>
+<p>2.增加tiny_kernel功能</p>
 
                     </main>
 
