@@ -2881,9 +2881,8 @@ Shell: Process 2 exited with code 0
 <p>上午讨论中向老师提示看vDSO. 了解中</p>
 <p>vdso中需要多个虚拟页面映射到同一个物理页面</p>
 <p>尝试一下~</p>
-<p>在memory_set中的from_elf函数中加入memory_set.push_shared();</p>
 <p>尝试把一个指向666的地址开始的一页映射到用户空间去</p>
-<p>内核空间中的地址(也等于物理地址) = 0x8024e210</p>
+<p>ptr在内核空间中的地址-0xffffffff40000000 = 物理地址 = 0x8024e210</p>
 <p>把它映射到用户空间的0x86750000-0x86751000这一页中, 然后我们在用户空间下看看能不能访问它</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
