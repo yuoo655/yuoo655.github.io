@@ -145,6 +145,86 @@
                     <main>
                         <p><strong>8-13</strong></p>
 <p>上午讨论中向老师提示看vDSO. 了解中</p>
+<p>vdso中需要多个虚拟页面映射到同一个物理页面</p>
+<p>尝试一下~</p>
+<p>在memory_set中的from_elf函数中加入memory_set.push_shared();</p>
+<p>尝试把一个指向666的地址开始的一页映射到用户空间去</p>
+<p>内核空间中的地址(也等于物理地址) = 0x8024e210</p>
+<p>把它映射到用户空间的0x86750000-0x86751000这一页中, 然后我们在用户空间下看看能不能访问它</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let ptr: *const usize = &amp;666usize as *const usize;
+println!( &quot;ptr {:#x}&quot;, ptr as usize- 0xffffffff40000000) ;
+let va_range1 =
+    VirtualAddress(0x86750000 as usize)..VirtualAddress(0x86751000)
+let pa_range1 =
+    PhysicalAddress(0x8024e000)..PhysicalAddress(0x8024f000)
+mapping.map_defined(
+    &amp;va_range1,
+    &amp;pa_range1,
+    Flags::WRITABLE | Flags::READABLE | Flags::EXECUTABLE | Flags::USER,
+);
+<span class="boring">}
+</span></code></pre></pre>
+<p>然后在用户进程下试图获取其中数据</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[no_mangle]
+#[link_section = &quot;.text.entry&quot;]
+pub extern &quot;C&quot; fn _start() -&gt; ! {
+    println!(&quot;0x86750210 ---------------------------------{}&quot;, unsafe { *((0x86750210) as usize as *const usize) });
+    extern &quot;C&quot; {
+        fn sbss();
+        fn ebss();
+    }
+    unsafe {
+        r0::zero_bss(
+            &amp;mut sbss as *mut _ as *mut u32,
+            &amp;mut ebss as *mut _ as *mut u32,
+        );
+        HEAP.lock()
+            .init(HEAP_SPACE.as_ptr() as usize, USER_HEAP_SIZE);
+    }
+    let exit_code = main();
+    exit(exit_code);
+    unreachable!()
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>可以看到目标初步实现了.</p>
+<pre><code class="language-log">[virtio] found a block device of size 262144 KB
+[virtio] DMA address: 0x80536000
+fs init
+[/]: yield-task0.bin yield-task1.bin async-read.bin channel.bin 
+new asid: AddressSpaceId(1)
+new asid: AddressSpaceId(2)
+new asid: AddressSpaceId(3)
+new asid: AddressSpaceId(4)
+asid AddressSpaceId(1) user base: PhysicalAddress(87000000)
+ptr 0x8024e210
+asid AddressSpaceId(2) user base: PhysicalAddress(8712c000)
+ptr 0x8024e210
+asid AddressSpaceId(3) user base: PhysicalAddress(87258000)
+ptr 0x8024e210
+asid AddressSpaceId(4) user base: PhysicalAddress(87384000)
+ptr 0x8024e210
+0x86750210 ---------------------------------666
+yield-task0 adding task
+yield-task0 do_yeild(2)
+[syscall] yield: 2
+0x86750210 ---------------------------------666
+yield-task1 adding task
+yield-task0 do_yield(3)
+[syscall] yield: 3
+0x86750210 ---------------------------------666
+async-read adding task
+async-read do_yield
+[syscall] yield: 4
+0x86750210 ---------------------------------666
+finding next task 
+</code></pre>
 
                     </main>
 
@@ -175,20 +255,6 @@
 
         </div>
 
-                <!-- Livereload script (if served using the cli tool) -->
-        <script type="text/javascript">
-            var socket = new WebSocket("ws://localhost:3000/__livereload");
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
         
         
         

@@ -193,7 +193,7 @@ let p2_table = if self.root_table.entries[p3_index].is_unused() {
 </span><span class="boring">fn main() {
 </span>let frame = self.root_table.entries[p3_index].frame();
 pub unsafe fn as_kernel_mut&lt;'a, 'b, T&gt;(&amp;'a self) -&gt; &amp;'b mut T {
-    &amp;mut *(    (    (self.0).0 + PHYSICAL_MEMORY_OFFSET)             as *mut T       )
+    &amp;mut *(    ((self.0).0 + PHYSICAL_MEMORY_OFFSET)   as *mut T  )
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -304,20 +304,6 @@ pub fn unmap(&amp;mut self, va:usize) {
 
         </div>
 
-                <!-- Livereload script (if served using the cli tool) -->
-        <script type="text/javascript">
-            var socket = new WebSocket("ws://localhost:3000/__livereload");
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
         
         
         
