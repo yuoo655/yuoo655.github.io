@@ -145,6 +145,7 @@
                     <main>
                         <p><strong>8-13</strong></p>
 <p>上午讨论中向老师提示看vDSO. 了解中</p>
+<p><strong>8:15回记:此时未理解vDSO,vDSO根本不是这样~~</strong></p>
 <p>vdso中需要多个虚拟页面映射到同一个物理页面</p>
 <p>尝试一下~</p>
 <p>尝试把一个指向666的地址开始的一页映射到用户空间去</p>
@@ -254,6 +255,20 @@ finding next task
 
         </div>
 
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
         
         
         
