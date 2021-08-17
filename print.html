@@ -3373,14 +3373,15 @@ fn map_from_elf(&amp;self, elf: &amp;ElfFile, vmo: Arc&lt;VmObject&gt;) -&gt; Zx
     }
     Ok(())
 }
-//-------------------------------------------------------------------------
-//接上
-
-
-//解析符号表, 如果符号表中有zcore_syscall_entry则获取它的地址..
-//这就对应了之前修改zircon生成实际vdso的部分,如果经过那个动态库编译,符号表中是会出现zcore_syscall_entry的
-
-        #[cfg(feature = &quot;std&quot;)]
+-------------------------------------------------------------------------
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>解析符号表, 如果符号表中有zcore_syscall_entry则获取它的地址..</strong></p>
+<p><strong>这就对应了之前修改zircon生成实际vdso的部分,如果经过那个动态库编译,符号表中是会出现zcore_syscall_entry的</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>        #[cfg(feature = &quot;std&quot;)]
         {
             //获取符号名为zcore_syscall_entry的符号地址
             let offset = elf.get_symbol_address(&quot;zcore_syscall_entry&quot;).expect(&quot;failed to locate syscall entry&quot;) as usize;
