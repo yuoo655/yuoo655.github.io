@@ -172,6 +172,7 @@ zcore_syscall_entry:
 <span class="boring">include &quot;syscalls-stubs.S&quot;
 </span><span class="boring">}
 </span></code></pre></pre>
+<p><strong>主要改动的代码</strong></p>
 <p>mov $\num, %eax 保存系统调用号</p>
 <p>jmpq *zcore_syscall_entry(%rip)  跳转到 [rip + *zcore_syscall_entry]</p>
 <p><strong>看一下编译出来的vdso----libzircon.so</strong>(我没编译. 拿了现成的)</p>
