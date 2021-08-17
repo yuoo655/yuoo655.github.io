@@ -221,54 +221,69 @@ fn main(ramfs_data: &amp;[u8], cmdline: &amp;str) {
 </code></pre></pre>
 <p><strong>zircon-loader做了为用户程序准备好执行环境,其中就包含了映射vDSO部分</strong></p>
 <p><strong>在zircon-loader::run_userboot()下</strong></p>
+<p>// 当内核将userboot映射到第一个用户进程时，会像正常程序那样，在内存中选择一个随机地址进行加载。而在映射userboot的vDSO时，并不采用上述随机的方式，而是将vDSO映像直接放在内存中userboot的映像之后。这样一来，vDSO代码与userboot的偏移量总是固定的。在编译阶段中，系统调用的入口点符号表会从vDSO ELF映像中提取出来，随后写入到链接脚本的符号定义中。利用每个符号在vDSO映像中相对固定的偏移地址，可在链接脚本提供的_end符号的固定偏移量处，定义该符号。通过这种方式，userboot代码可以直接调用到放在内存中，其映像本身之后的，每个确切位置上的vDSO入口点。</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>pub fn run_userboot(images: &amp;Images&lt;impl AsRef&lt;[u8]&gt;&gt;, cmdline: &amp;str) -&gt; Arc&lt;Process&gt; {
-    let job = Job::root();
-    let proc = Process::create(&amp;job, &quot;userboot&quot;).unwrap();
-    let thread = Thread::create(&amp;proc, &quot;userboot&quot;).unwrap();
-    let resource = Resource::create(
-        &quot;root&quot;,
-        ResourceKind::ROOT,
-        0,
-        0x1_0000_0000,
-        ResourceFlags::empty(),
-    );
-    let vmar = proc.vmar();
 
-    // userboot
-    let (entry, userboot_size) = {
-        let elf = ElfFile::new(images.userboot.as_ref()).unwrap();
-        let size = elf.load_segment_size();
-        let vmar = vmar
-            .allocate(None, size, VmarFlags::CAN_MAP_RXW, PAGE_SIZE)
-            .unwrap();
-        vmar.load_from_elf(&amp;elf).unwrap();
-        (vmar.addr() + elf.header.pt2.entry_point() as usize, size)
-    };
-
+....(略)
     // vdso
+    //为vdso创建vmo
+    //vmo表示虚拟内存的一个连续区域,可以映射到多个地址空间中..VMO在内核和用户空间中用于表示分页内存和物理内存.
+
     let vdso_vmo = {
         let elf = ElfFile::new(images.vdso.as_ref()).unwrap();
         let vdso_vmo = VmObject::new_paged(images.vdso.as_ref().len() / PAGE_SIZE + 1);
         vdso_vmo.write(0, images.vdso.as_ref()).unwrap();
         let size = elf.load_segment_size();
-        let vmar = vmar
-            .allocate_at(
-                userboot_size,
-                size,
-                VmarFlags::CAN_MAP_RXW | VmarFlags::SPECIFIC,
-                PAGE_SIZE,
-            )
-            .unwrap();
+
+        //allocate_at: Create a child VMAR at the `offset`.
+        let vmar = vmar.allocate_at(userboot_size,
+                                    size,
+                                    VmarFlags::CAN_MAP_RXW | VmarFlags::SPECIFIC,
+                                    PAGE_SIZE,).unwrap();
+
+        //这里就到了vDSO的部分,原本需要从文件系统中加载一个.so过来,这里直接把前面已经映射好vdso的vmo传入过去
+        // Same as `load_from_elf`, but the `vmo` is an existing one instead of a lot of new ones.
         vmar.map_from_elf(&amp;elf, vdso_vmo.clone()).unwrap();
+
+
+//-------------------------------------------------------------------------
+fn map_from_elf(&amp;self, elf: &amp;ElfFile, vmo: Arc&lt;VmObject&gt;) -&gt; ZxResult {
+    for ph in elf.program_iter() {
+
+        //只有TYPE=LOAD的才需要被映射进内存
+        if ph.get_type().unwrap() != Type::Load {
+            continue;
+        }
+        //获取elf文件中的VirtAddr
+        let offset = ph.virtual_addr() as usize;
+        //获取elf中的权限信息
+        let flags = ph.flags().to_mmu_flags();
+        //获取elf文件中的PhysAddr 并做对齐
+        let vmo_offset = pages(ph.physical_addr() as usize) * PAGE_SIZE;
+        //获取elf文件中的MemSiz
+        let len = pages(ph.mem_size() as usize) * PAGE_SIZE;
+        //完成映射
+        self.map_at(offset, vmo.clone(), vmo_offset, len, flags)?;
+    }
+    Ok(())
+}
+//-------------------------------------------------------------------------
+//接上
+
+
+//解析符号表, 如果符号表中有zcore_syscall_entry则获取它的地址..
+//这就对应了之前修改zircon生成实际vdso的部分,如果经过那个动态库编译,符号表中是会出现zcore_syscall_entry的
+
         #[cfg(feature = &quot;std&quot;)]
         {
-            let offset = elf
-                .get_symbol_address(&quot;zcore_syscall_entry&quot;)
-                .expect(&quot;failed to locate syscall entry&quot;) as usize;
+            //获取符号名为zcore_syscall_entry的符号地址
+            let offset = elf.get_symbol_address(&quot;zcore_syscall_entry&quot;).expect(&quot;failed to locate syscall entry&quot;) as usize;
             let syscall_entry = &amp;(kernel_hal_unix::syscall_entry as usize).to_ne_bytes();
+
+            //映射zcore_syscall_entry和真实的syscall_entry的物理地址   为什么x3 I have no idea.
             // fill syscall entry x3
             vdso_vmo.write(offset, syscall_entry).unwrap();
             vdso_vmo.write(offset + 8, syscall_entry).unwrap();
@@ -276,77 +291,27 @@ fn main(ramfs_data: &amp;[u8], cmdline: &amp;str) {
         }
         vdso_vmo
     };
-
-    // zbi
-    let zbi_vmo = {
-        let vmo = VmObject::new_paged(images.zbi.as_ref().len() / PAGE_SIZE + 1);
-        vmo.write(0, images.zbi.as_ref()).unwrap();
-        vmo.set_name(&quot;zbi&quot;);
-        vmo
-    };
-
-    // stack
-    const STACK_PAGES: usize = 8;
-    let stack_vmo = VmObject::new_paged(STACK_PAGES);
-    let flags = MMUFlags::READ | MMUFlags::WRITE | MMUFlags::USER;
-    let stack_bottom = vmar
-        .map(None, stack_vmo.clone(), 0, stack_vmo.len(), flags)
-        .unwrap();
-    #[cfg(target_arch = &quot;x86_64&quot;)]
-    // WARN: align stack to 16B, then emulate a 'call' (push rip)
-    let sp = stack_bottom + stack_vmo.len() - 8;
-    #[cfg(target_arch = &quot;aarch64&quot;)]
-    let sp = stack_bottom + stack_vmo.len();
-
-    // channel
-    let (user_channel, kernel_channel) = Channel::create();
-    let handle = Handle::new(user_channel, Rights::DEFAULT_CHANNEL);
-
-    let mut handles = vec![Handle::new(proc.clone(), Rights::empty()); K_HANDLECOUNT];
-    handles[K_PROC_SELF] = Handle::new(proc.clone(), Rights::DEFAULT_PROCESS);
-    handles[K_VMARROOT_SELF] = Handle::new(proc.vmar(), Rights::DEFAULT_VMAR | Rights::IO);
-    handles[K_ROOTJOB] = Handle::new(job, Rights::DEFAULT_JOB);
-    handles[K_ROOTRESOURCE] = Handle::new(resource, Rights::DEFAULT_RESOURCE);
-    handles[K_ZBI] = Handle::new(zbi_vmo, Rights::DEFAULT_VMO);
-    // set up handles[K_FIRSTVDSO..K_LASTVDSO + 1]
-    const VDSO_DATA_CONSTANTS: usize = 0x4a50;
-    const VDSO_DATA_CONSTANTS_SIZE: usize = 0x78;
-    let constants: [u8; VDSO_DATA_CONSTANTS_SIZE] =
-        unsafe { core::mem::transmute(kernel_hal::vdso_constants()) };
-    vdso_vmo.write(VDSO_DATA_CONSTANTS, &amp;constants).unwrap();
-    vdso_vmo.set_name(&quot;vdso/full&quot;);
-    let vdso_test1 = vdso_vmo.create_child(false, 0, vdso_vmo.len()).unwrap();
-    vdso_test1.set_name(&quot;vdso/test1&quot;);
-    let vdso_test2 = vdso_vmo.create_child(false, 0, vdso_vmo.len()).unwrap();
-    vdso_test2.set_name(&quot;vdso/test2&quot;);
-    handles[K_FIRSTVDSO] = Handle::new(vdso_vmo, Rights::DEFAULT_VMO | Rights::EXECUTE);
-    handles[K_FIRSTVDSO + 1] = Handle::new(vdso_test1, Rights::DEFAULT_VMO | Rights::EXECUTE);
-    handles[K_FIRSTVDSO + 2] = Handle::new(vdso_test2, Rights::DEFAULT_VMO | Rights::EXECUTE);
-    // TODO: use correct CrashLogVmo handle
-    let crash_log_vmo = VmObject::new_paged(1);
-    crash_log_vmo.set_name(&quot;crashlog&quot;);
-    handles[K_CRASHLOG] = Handle::new(crash_log_vmo, Rights::DEFAULT_VMO);
-    let (counter_name_vmo, kcounters_vmo) = kcounter::create_kcounter_vmo();
-    handles[K_COUNTERNAMES] = Handle::new(counter_name_vmo, Rights::DEFAULT_VMO);
-    handles[K_COUNTERS] = Handle::new(kcounters_vmo, Rights::DEFAULT_VMO);
-    // TODO: use correct Instrumentation data handle
-    let instrumentation_data_vmo = VmObject::new_paged(0);
-    instrumentation_data_vmo.set_name(&quot;UNIMPLEMENTED_VMO&quot;);
-    handles[K_FISTINSTRUMENTATIONDATA] =
-        Handle::new(instrumentation_data_vmo.clone(), Rights::DEFAULT_VMO);
-    handles[K_FISTINSTRUMENTATIONDATA + 1] =
-        Handle::new(instrumentation_data_vmo.clone(), Rights::DEFAULT_VMO);
-    handles[K_FISTINSTRUMENTATIONDATA + 2] =
-        Handle::new(instrumentation_data_vmo.clone(), Rights::DEFAULT_VMO);
-    handles[K_FISTINSTRUMENTATIONDATA + 3] =
-        Handle::new(instrumentation_data_vmo, Rights::DEFAULT_VMO);
-
-    // check: handle to root proc should be only
+//-------------------------------------------------------------------------
+fn get_symbol_address(&amp;self, symbol: &amp;str) -&gt; Option&lt;u64&gt; {
+    for section in self.section_iter() {
+        if let SectionData::SymbolTable64(entries) = section.get_data(self).unwrap() {
+            for e in entries {
+                if e.get_name(self).unwrap() == symbol {
+                    return Some(e.value());
+                }
+            }
+        }
+    }
+    None
+}
+//-------------------------------------------------------------------------
+........(略)
 
     let data = Vec::from(cmdline.replace(':', &quot;\0&quot;) + &quot;\0&quot;);
     let msg = MessagePacket { data, handles };
     kernel_channel.write(msg).unwrap();
 
+//entry为userboot的entry
     proc.start(&amp;thread, entry, sp, Some(handle), 0, thread_fn)
         .expect(&quot;failed to start main thread&quot;);
     proc
@@ -389,20 +354,6 @@ fn main(ramfs_data: &amp;[u8], cmdline: &amp;str) {
 
         </div>
 
-                <!-- Livereload script (if served using the cli tool) -->
-        <script type="text/javascript">
-            var socket = new WebSocket("ws://localhost:3000/__livereload");
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
         
         
         
