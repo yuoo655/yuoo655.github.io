@@ -159,7 +159,7 @@
 <table><thead><tr><th>Mon</th><th>Tues</th><th>Wed</th><th>Thur</th><th>Fri</th><th>Sat</th><th>Sun</th></tr></thead><tbody>
 <tr><td></td><td></td><td></td><td></td><td></td><td>1<br>(<a href="daliy/8-1%7E8.9.html">D31</a>)</td><td>2  <br></td></tr>
 <tr><td>3 <br></td><td>4 <br></td><td>5  <br></td><td>6  <br></td><td>7  <br></td><td>8  <br></td><td>9<br>(<a href="daliy/8-9.html">D40</a>)</td></tr>
-<tr><td>10<br>(<a href="daliy/8-10.html">D41</a>)</td><td>11<br>(<a href="daliy/8-11.html">D42</a>)</td><td>12 <br></td><td>13 <br></td><td>14 <br></td><td>15 <br></td><td>16 <br></td></tr>
+<tr><td>10<br>(<a href="daliy/8-10.html">D41</a>)</td><td>11<br>(<a href="daliy/8-11.html">D42</a>)</td><td>12 <br>(<a href="daliy/8-12.html">D43</a>)</td><td>13<br>(<a href="daliy/8-13.html">D44</a>)</td><td>14<br>(<a href="daliy/8-14.html">D45</a>)</td><td>15<br>(<a href="daliy/8-15.html">D46</a>)</td><td>16 <br></td></tr>
 <tr><td>17<br></td><td>18<br></td><td>19 <br></td><td>20 <br></td><td>21 <br></td><td>22 <br></td><td>23 <br></td></tr>
 <tr><td>24<br></td><td>25<br></td><td>26 <br></td><td>27 <br></td><td>28 <br></td><td>29 <br></td><td>30 <br></td></tr>
 <tr><td>31<br></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
@@ -3163,15 +3163,76 @@ Shell: Process 2 exited with code 0
 <p>需要做的准备: 看Green thread  以及 200行代码学future</p>
 <p>接下来的任务:了解动态链接,以及zcore中vDSO相关的内容,在rcore中重现相关内容</p>
 <div style="break-before: page; page-break-before: always;"></div><p><strong>8.16</strong></p>
+<p>学习zcore中的vDSO</p>
 <p>在zcore中的rust程序是使用std的.与之前的no_std的用户程序不同,最后需要经过libc封装,因为rust-std也是封装的libc</p>
 <p>libc可以理解为封装了系统调用的一个库</p>
-<p>例如println!()这个函数最终会议某种方式调用libc库.libc中执行了某系统调用来完成操作</p>
+<p><strong>std下println!()</strong></p>
+<p>println!()会以调用libc库.最终以执行libc封装好的系统调用来完成操作</p>
 <pre><pre class="playground"><code class="language-rust">fn main() {
     println!(&quot;Hello, zCore!-----------------------------------------&quot;);
 }
 </code></pre></pre>
-<p>对比no_std下的println!()</p>
-<pre><code></code></pre>
+<p><strong>对比no_std下的println!()</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>const SYSCALL_WRITE: usize = 64;
+fn syscall(id: usize, args: [usize; 3]) -&gt; isize {
+    let mut ret: isize;
+    unsafe {
+        llvm_asm!(&quot;ecall&quot;
+            : &quot;={x10}&quot; (ret)
+            : &quot;{x10}&quot; (args[0]), &quot;{x11}&quot; (args[1]), &quot;{x12}&quot; (args[2]), &quot;{x17}&quot; (id)
+            : &quot;memory&quot;
+            : &quot;volatile&quot;
+        );
+    }
+    ret
+}
+pub fn sys_write(fd: usize, buffer: &amp;[u8]) -&gt; isize {
+  syscall(SYSCALL_WRITE, [fd, buffer.as_ptr() as usize, buffer.len()])
+}
+struct Stdout;
+impl Write for Stdout {
+    fn write_str(&amp;mut self, s: &amp;str) -&gt; fmt::Result {
+        sys_write(1, s.as_bytes());
+        Ok(())
+    }
+}
+pub fn print(args: fmt::Arguments) {
+    Stdout.write_fmt(args).unwrap();
+}
+#[macro_export]
+macro_rules! print {
+    ($fmt: literal $(, $($arg: tt)+)?) =&gt; {
+        $crate::console::print(format_args!($fmt $(, $($arg)+)?));
+    }
+}
+#[macro_export]
+macro_rules! println {
+    ($fmt: literal $(, $($arg: tt)+)?) =&gt; {
+        print(format_args!(concat!($fmt, &quot;\n&quot;) $(, $($arg)+)?));
+    }
+}
+
+#[no_mangle]
+extern &quot;C&quot; fn _start() {
+    println!(&quot;Hello, world!&quot;);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>怎么样..是不是比较曲折.可以理解在std下libc为程序做了差不多的事情.</p>
+<p>动态链接</p>
+<p>想象这样一种情况,一个程序使用了libc标准库,现在计算机中同时运行着该程序的100个进程.那么,每个进程中都会有一份libc,操作系统需要在真实的物理内存中加载100份libc,浪费了很多内存.(通过no_std的例子就可以感觉到)</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ldd /bin/sh
+        linux-vdso.so.1 (0x00007fff7910b000)
+        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4d7b663000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f4d7b88c000)
+<span class="boring">}
+</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><p>以下是一些尤予阳在微信群的讨论</p>
 <p><img src="./../ecall.jpg" alt="avatar" /></p>
 <p>尤予阳:有rs1和rd的位置，但是强制为0</p>
@@ -3376,6 +3437,20 @@ $ docker ps -a
 
         </div>
 
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
         
         
         

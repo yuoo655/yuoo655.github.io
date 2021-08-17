@@ -144,15 +144,76 @@
                 <div id="content" class="content">
                     <main>
                         <p><strong>8.16</strong></p>
+<p>学习zcore中的vDSO</p>
 <p>在zcore中的rust程序是使用std的.与之前的no_std的用户程序不同,最后需要经过libc封装,因为rust-std也是封装的libc</p>
 <p>libc可以理解为封装了系统调用的一个库</p>
-<p>例如println!()这个函数最终会议某种方式调用libc库.libc中执行了某系统调用来完成操作</p>
+<p><strong>std下println!()</strong></p>
+<p>println!()会以调用libc库.最终以执行libc封装好的系统调用来完成操作</p>
 <pre><pre class="playground"><code class="language-rust">fn main() {
     println!(&quot;Hello, zCore!-----------------------------------------&quot;);
 }
 </code></pre></pre>
-<p>对比no_std下的println!()</p>
-<pre><code></code></pre>
+<p><strong>对比no_std下的println!()</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>const SYSCALL_WRITE: usize = 64;
+fn syscall(id: usize, args: [usize; 3]) -&gt; isize {
+    let mut ret: isize;
+    unsafe {
+        llvm_asm!(&quot;ecall&quot;
+            : &quot;={x10}&quot; (ret)
+            : &quot;{x10}&quot; (args[0]), &quot;{x11}&quot; (args[1]), &quot;{x12}&quot; (args[2]), &quot;{x17}&quot; (id)
+            : &quot;memory&quot;
+            : &quot;volatile&quot;
+        );
+    }
+    ret
+}
+pub fn sys_write(fd: usize, buffer: &amp;[u8]) -&gt; isize {
+  syscall(SYSCALL_WRITE, [fd, buffer.as_ptr() as usize, buffer.len()])
+}
+struct Stdout;
+impl Write for Stdout {
+    fn write_str(&amp;mut self, s: &amp;str) -&gt; fmt::Result {
+        sys_write(1, s.as_bytes());
+        Ok(())
+    }
+}
+pub fn print(args: fmt::Arguments) {
+    Stdout.write_fmt(args).unwrap();
+}
+#[macro_export]
+macro_rules! print {
+    ($fmt: literal $(, $($arg: tt)+)?) =&gt; {
+        $crate::console::print(format_args!($fmt $(, $($arg)+)?));
+    }
+}
+#[macro_export]
+macro_rules! println {
+    ($fmt: literal $(, $($arg: tt)+)?) =&gt; {
+        print(format_args!(concat!($fmt, &quot;\n&quot;) $(, $($arg)+)?));
+    }
+}
+
+#[no_mangle]
+extern &quot;C&quot; fn _start() {
+    println!(&quot;Hello, world!&quot;);
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>怎么样..是不是比较曲折.可以理解在std下libc为程序做了差不多的事情.</p>
+<p>动态链接</p>
+<p>想象这样一种情况,一个程序使用了libc标准库,现在计算机中同时运行着该程序的100个进程.那么,每个进程中都会有一份libc,操作系统需要在真实的物理内存中加载100份libc,浪费了很多内存.(通过no_std的例子就可以感觉到)</p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>ldd /bin/sh
+        linux-vdso.so.1 (0x00007fff7910b000)
+        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4d7b663000)
+        /lib64/ld-linux-x86-64.so.2 (0x00007f4d7b88c000)
+<span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 
@@ -183,6 +244,20 @@
 
         </div>
 
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
         
         
         

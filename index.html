@@ -158,7 +158,7 @@
 <table><thead><tr><th>Mon</th><th>Tues</th><th>Wed</th><th>Thur</th><th>Fri</th><th>Sat</th><th>Sun</th></tr></thead><tbody>
 <tr><td></td><td></td><td></td><td></td><td></td><td>1<br>(<a href="daliy/8-1%7E8.9.html">D31</a>)</td><td>2  <br></td></tr>
 <tr><td>3 <br></td><td>4 <br></td><td>5  <br></td><td>6  <br></td><td>7  <br></td><td>8  <br></td><td>9<br>(<a href="daliy/8-9.html">D40</a>)</td></tr>
-<tr><td>10<br>(<a href="daliy/8-10.html">D41</a>)</td><td>11<br>(<a href="daliy/8-11.html">D42</a>)</td><td>12 <br></td><td>13 <br></td><td>14 <br></td><td>15 <br></td><td>16 <br></td></tr>
+<tr><td>10<br>(<a href="daliy/8-10.html">D41</a>)</td><td>11<br>(<a href="daliy/8-11.html">D42</a>)</td><td>12 <br>(<a href="daliy/8-12.html">D43</a>)</td><td>13<br>(<a href="daliy/8-13.html">D44</a>)</td><td>14<br>(<a href="daliy/8-14.html">D45</a>)</td><td>15<br>(<a href="daliy/8-15.html">D46</a>)</td><td>16 <br></td></tr>
 <tr><td>17<br></td><td>18<br></td><td>19 <br></td><td>20 <br></td><td>21 <br></td><td>22 <br></td><td>23 <br></td></tr>
 <tr><td>24<br></td><td>25<br></td><td>26 <br></td><td>27 <br></td><td>28 <br></td><td>29 <br></td><td>30 <br></td></tr>
 <tr><td>31<br></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
@@ -188,6 +188,20 @@
 
         </div>
 
+                <!-- Livereload script (if served using the cli tool) -->
+        <script type="text/javascript">
+            var socket = new WebSocket("ws://localhost:3000/__livereload");
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
         
         
         
