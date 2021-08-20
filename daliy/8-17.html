@@ -324,16 +324,17 @@ fn get_symbol_address(&amp;self, symbol: &amp;str) -&gt; Option&lt;u64&gt; {
 }
 <span class="boring">}
 </span></code></pre></pre>
+<p>vDSO被映射到新进程的同时会将映像的base address通过arg2参数传递给新进程中的第一个线程。</p>
+<p>通过这个地址，可以在内存中找到ELF的文件头，该文件头指向可用于查找系统调用符号名的其他ELF程序模块。</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
-</span>//vDSO被映射到新进程的同时会将映像的base address通过arg2参数传递给新进程中的第一个线程。通过这个地址，可以在内存中找到ELF的文件头，该文件头指向可用于查找系统调用符号名的其他ELF程序模块。
-thread.start(entry, stack, handle_value as usize, arg2, thread_fn)
+</span>thread.start(entry, stack, handle_value as usize, arg2, thread_fn)
 <span class="boring">}
 </span></code></pre></pre>
-<p>通过输出信息可以看到动态连接器在userboot bootfs中
-userboot: searching bootfs for 'lib/ld.so.1'
-userboot: userboot: loaded lib/ld.so.1 at 0x400000000000, entry point 0x40000005772c</p>
+<p>通过输出信息可以看到动态连接器在userboot bootfs中</p>
+<p>userboot: searching bootfs for 'lib/ld.so.1'</p>
+<p>userboot: userboot: loaded lib/ld.so.1 at 0x400000000000, entry point 0x40000005772c</p>
 <pre><pre class="playground"><code class="language-rust">
 <span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
