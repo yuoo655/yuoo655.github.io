@@ -3511,7 +3511,8 @@ Shell: Process 2 exited with code 0
 <p>call(伪指令)大致会分解成  auipc 和 jalr 指令</p>
 <p>auipc   ra, 0x0   保存当前pc值在ra中</p>
 <p>jalr (Jump and Link Register)</p>
-<p>如果函数复杂一些可能就需要保存一些寄存器了,保险起见还是用switch的形式来跳转到目标函数地址来执行吧.</p>
+<p>返回值在a0中</p>
+<p>如果函数复杂一些可能就需要保存一些寄存器了,保险起见还是用switch的形式来跳转到目标函数地址来执行.</p>
 <p>通过在let x = test1();处设置断点然后单步调试分析</p>
 <pre><pre class="playground"><code class="language-rust">fn main() {
     let x = test1();
