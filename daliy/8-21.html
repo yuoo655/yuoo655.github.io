@@ -154,6 +154,7 @@
 <p>带参数情况li  a0, arg   然后再执行auipc  ra,0x0</p>
 <p>多个参数应该顺序保存在a0, a1...中</p>
 <p>如果函数复杂一些可能就需要保存一些寄存器了,保险起见还是用switch的形式来跳转到目标函数地址来执行.</p>
+<p>通过这种方法,大致可以做到和动态链接一样的事了....</p>
 <p>通过在let x = test1();处设置断点然后单步调试分析</p>
 <pre><pre class="playground"><code class="language-rust">fn main() {
     let x = test1();
