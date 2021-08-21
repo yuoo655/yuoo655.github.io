@@ -1928,7 +1928,7 @@ pub unsafe fn as_kernel_mut&lt;'a, 'b, T&gt;(&amp;'a self) -&gt; &amp;'b mut T {
 <p>可以采用一个固定的偏移 pa = va +  PHYSICAL_MEMORY_OFFSET</p>
 </li>
 <li>
-<p>可以采用之前写好的物理内场分配器分配一个物理页号</p>
+<p>可以采用之前写好的物理内存分配器分配一个物理页号</p>
 </li>
 <li>
 <p>...</p>
@@ -3503,6 +3503,7 @@ Shell: Process 2 exited with code 0
 &gt;&gt;
 <span class="boring">}
 </span></code></pre></pre>
+<p>接下来考虑支持sys_yield</p>
 <div style="break-before: page; page-break-before: always;"></div><p>以下是一些尤予阳在微信群的讨论</p>
 <p><img src="./../ecall.jpg" alt="avatar" /></p>
 <p>尤予阳:有rs1和rd的位置，但是强制为0</p>
