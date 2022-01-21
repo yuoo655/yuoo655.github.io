@@ -262,8 +262,9 @@ bss段(.bss) : 未初始化或初始化为0的全局和静态数据存放位置<
 <p>闭包就是一个捕获了当前上下文变量的结构体(外加一段代码 lambda function)</p>
 <p>直接理解rust中的闭包有点困难,我们先从python的例子来看</p>
 <h3 id="python中的闭包"><a class="header" href="#python中的闭包">python中的闭包</a></h3>
+<p><strong>例一:</strong></p>
 <blockquote>
-<p>这个例子中. 一个函数内部定义另一个函数。这个函数就称为嵌套函数<br />
+<p>一个函数内部定义另一个函数。这个函数就称为嵌套函数<br />
 在display内部, 可以通过它的局部作用域访问greeting<br />
 Python 将该greeting变量称为自由变量。<br />
 当您查看display函数时，实际上是在查看：display函数本身。以及值为'Hello'的自由变量greeting。</p>
@@ -276,10 +277,10 @@ Python 将该greeting变量称为自由变量。<br />
 
     display()
 </code></pre>
+<p><strong>例二:</strong></p>
 <blockquote>
-<p>这个例子中say()函数返回display()函数,而不是执行它<br />
-当返回display()函数时,它也返回了闭包<br />
-<img src="futures_in_rust/./../img/closure_python.png" alt="avatar" /></p>
+<p>say()函数返回display()函数,而不是执行它<br />
+当返回display()函数时,它也返回了闭包</p>
 </blockquote>
 <pre><code class="language-python">def say():
     greeting = 'hello'
@@ -292,6 +293,9 @@ Python 将该greeting变量称为自由变量。<br />
 fn = say()
 fn()
 </code></pre>
+<blockquote>
+<p><img src="futures_in_rust/./../img/closure_python.png" alt="avatar" /></p>
+</blockquote>
 <p><strong>输出:</strong></p>
 <p><strong>hello</strong></p>
 <p>既然变量greeting是say的局部变量,出了函数体应该是不能访问greeting的, 但依旧可以看到fn()输出了hello</p>
@@ -300,6 +304,7 @@ fn()
 (&lt;cell at 0x0000017184915C40: str object at 0x0000017186A829B0&gt;,)
 </code></pre>
 <p>在这个例子中，单元的内存地址是0x0000017184915C40。它引用了一个字符串对象0x0000017186A829B0</p>
+<p><strong>例三:</strong></p>
 <blockquote>
 <p>如果在say函数 和中显示字符串对象的内存地址closure，您应该会看到它们引用了内存中的同一个对象：
 这时多个作用域共享同一个变量，所以外部函数和内部函数作用域中的变量greeting是相同的</p>
