@@ -144,6 +144,122 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="闭包到生成器"><a class="header" href="#闭包到生成器">闭包到生成器</a></h1>
+<h2 id="生成器"><a class="header" href="#生成器">生成器</a></h2>
+<p><strong>一个简单的生成器</strong></p>
+<blockquote>
+<p>下面gen是一个生成器. 可以看处它是使用闭包的语法声明的. 
+与闭包不同的是. 它多了一个yield关键字, 它可以通过resume()方法多次恢复.<br />
+每次resume()调用时,闭包内的代码都会运行, 直到遇到yield<br />
+resume返回 yield的值</p>
+</blockquote>
+<pre><pre class="playground"><code class="language-rust">#![feature(generators, generator_trait)]
+use std::ops::Generator;
+use std::pin::Pin;
+
+fn main() {
+    // 用闭包创建一个生成器
+    let mut gen = || {
+        yield 1;
+        yield 2;
+        yield 3;
+        yield 4;
+        return 5;
+    };
+
+    //不断调用resume执行
+    for _ in 0..5 {
+        let c = Pin::new(&amp;mut gen).resume(());
+        println!(&quot;{:?}&quot;, c);
+    }
+
+}
+</code></pre></pre>
+<blockquote>
+<p>在这个例子中.前4个调用resume()将返回GeneratorState::Yielded(x)，然后返回GeneratorState::Complete(x).</p>
+</blockquote>
+<p><strong>输出</strong></p>
+<p>Yielded(1)</p>
+<p>Yielded(2) </p>
+<p>Yielded(3) </p>
+<p>Yielded(4) </p>
+<p>Complete(5)</p>
+<blockquote>
+<p>resume()真正返回的是GeneratorState   ,定义如下</p>
+</blockquote>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum GeneratorState&lt;Y, R&gt; {
+    Yielded(Y),
+    Complete(R),
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>接下来来看看生成器的背后具体做了什么,以及它和我们之前将的闭包的关系</strong></p>
+<pre><pre class="playground"><code class="language-rust">use std::pin::Pin;
+
+#[derive(Debug)]
+pub enum GeneratorState&lt;Y, R&gt; {
+    Yielded(Y),
+    Complete(R),
+}
+
+pub trait Generator&lt;R = ()&gt; {
+    type Yield;
+    type Return;
+    fn resume(self: Pin&lt;&amp;mut Self&gt;) -&gt; GeneratorState&lt;Self::Yield, Self::Return&gt;;
+}
+
+
+struct MyGen {
+    i: i32,
+}
+
+impl Generator for MyGen {
+    type Yield = i32;
+    type Return = i32;
+    fn resume(mut self : Pin&lt;&amp;mut Self&gt;) -&gt; GeneratorState&lt;Self::Yield, Self::Return&gt; {
+        self.i += 1;
+
+        if self.i == 5 {
+            GeneratorState::Complete(self.i)
+        } else {
+            GeneratorState::Yielded(self.i)
+        }
+    }
+}
+
+fn main() {
+    let mut gen = MyGen { i: 0 };    
+    for _ in 0..5 {
+        let c = Pin::new(&amp;mut gen).resume();
+        println!(&quot;{:?}&quot;, c);
+    }
+}
+</code></pre></pre>
+<p><strong>再看闭包内部的实现</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait FnOnce&lt;Args&gt; {
+    type Output;
+    extern &quot;rust-call&quot; fn call_once(self, args: Args) -&gt; Self::Output;
+}
+
+impl FnOnce&lt;()&gt; for Say {
+    type  Output = ();
+    extern &quot;rust-call&quot;  fn call_once(self, args: ()) -&gt; () {
+        foo();
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>可见每次生成器执行resume,相当于闭包执行了一次call_once(call, call_mut)</p>
+<p>与闭包不同的是,每次resume,生成器都将执行到结果为GeneratorState::Yielded()处, 编译器将生成器编译成状态机。每处yield出对应一个不同的状态.</p>
+<p><strong>参考</strong>
+<a href="https://cfsamson.github.io/books-futures-explained/introduction.html">Futures Explained in 200 Lines of Rust</a></p>
+<p><a href="https://time.geekbang.org/course/detail/100060601-294649">rust语言基础(张汉东)</a></p>
+<p><a href="https://github.com/rust-lang/rust/issues/43122">Experimentally add coroutines to Rust #43122</a></p>
 
                     </main>
 

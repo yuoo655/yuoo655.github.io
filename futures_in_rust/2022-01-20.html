@@ -245,20 +245,100 @@ fn()
 <p><strong>0x17186a829b0</strong></p>
 <h4 id="参考a-hrefhttpswwwpythontutorialnetadvanced-pythonpython-closureshttpswwwpythontutorialnetadvanced-pythonpython-closuresa"><a class="header" href="#参考a-hrefhttpswwwpythontutorialnetadvanced-pythonpython-closureshttpswwwpythontutorialnetadvanced-pythonpython-closuresa">参考:<a href="https://www.pythontutorial.net/advanced-python/python-closures/">https://www.pythontutorial.net/advanced-python/python-closures/</a></a></h4>
 <h2 id="rust中的闭包"><a class="header" href="#rust中的闭包">rust中的闭包</a></h2>
-<p>rust中闭包稍微复杂一些, 因为涉及到所有权,生命周期,以及可变引用相关内容</p>
+<p>rust中闭包稍微复杂一些, 因为涉及到获取参数的方式, 在rust中函数获取参数的方式有三种:获取所有权，可变借用和不可变借用</p>
 <h3 id="summary"><a class="header" href="#summary">Summary</a></h3>
 <p>闭包是<strong>函数指针(fn)和环境</strong>的组合</p>
 <p>闭包<strong>不捕获任何环境中变量</strong>是一个函数指针。</p>
-<p>闭包的方法移出了所捕获的变量的所有权**，则只会实现FnOnce(self)</p>
-<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且对变量进行了修改</strong>，即通过可变借用使用所捕获的变量，则会实现FnMut(&amp;mut self)</p>
-<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且没有对变量进行修改</strong>，即通过不可变借用使用所捕获的变量，则会实现Fn(&amp;self)</p>
+<p>闭包的方法移出了所捕获的变量的所有权，则会实现<code>FnOnce(self)</code></p>
+<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且对变量进行了修改</strong>，即通过可变借用使用所捕获的变量，则会实现<code>FnMut(&amp;mut self)</code></p>
+<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且没有对变量进行修改</strong>，即通过不可变借用使用所捕获的变量，则会实现<code>Fn(&amp;self)</code></p>
+<p>如果你希望强制闭包获取其使用的环境值的所有权，可以在参数列表前使用 <code>move</code> 关键字。这个技巧在将闭包传递给新线程以便将数据移动到新线程中时最为实用。</p>
 <blockquote>
 <p><img src="./../img/rust-closure2.jpg" alt="avatar" /></p>
 </blockquote>
+<h3 id="例"><a class="header" href="#例">例</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span>#![feature(unboxed_closures, fn_traits)]
+<span class="boring">fn main() {
+</span>//定义闭包结构体
+struct Say {
+    //捕获的环境变量
+    s: String,
+}
+
+//实现FnOnce方法
+impl FnOnce&lt;()&gt; for Say {
+    type  Output = ();
+    extern &quot;rust-call&quot;  fn call_once(self, args: ()) -&gt; () {
+        println!(&quot;{}&quot;, self.s);
+    }
+}
+
+//实现FnMut方法
+impl FnMut&lt;()&gt; for Say {
+    extern &quot;rust-call&quot;  fn call_mut(&amp;mut self, args: ()) -&gt; () {
+        self.s.push_str(&quot; world!&quot;);
+        println!(&quot;{}&quot;, self.s);
+    }
+}
+
+//实现Fn方法
+impl Fn&lt;()&gt; for Say {
+    extern &quot;rust-call&quot; fn call(&amp;self, args: ()) -&gt; () {
+        println!(&quot;{}&quot;, self.s);
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut greeting = &quot;hello&quot;.to_string();
+    //闭包say捕获环境变量greeting
+    let mut say = Say { s: greeting};
+    
+    //不修改环境变量 不捕获所有权
+    say.call(());
+    //修改环境变量, 不捕获所有权
+    say.call_mut(());
+    //移除所有权
+    say.call_once(());
+    //之后再调用call call_mut call_once就会报错
+}
+</code></pre></pre>
+<h3 id="在了解了rust闭包内部实现之后再看一些例子"><a class="header" href="#在了解了rust闭包内部实现之后再看一些例子">在了解了rust闭包内部实现之后,再看一些例子</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//实现了call. 不修改环境变量,不捕获所有权,可多次调用say,但不能修改greeting
+let greeting = &quot;hello&quot;;
+let say = || {
+    println!(&quot;{}&quot;, greeting);
+};
+say();
+
+//实现了call_mut,修改环境变量,不捕获所有权,可多次调用say,可修改greeting
+let mut greeting = &quot;hello&quot;.to_string();
+let mut say = || {
+    greeting.push_str(&quot; world&quot;);
+    println!(&quot;{}&quot;, greeting);
+};
+say();
+
+
+//实现了call_once,修改环境变量(也可以不修改),捕获所有权,只能调用一次say
+let mut greeting = &quot;hello&quot;.to_string();
+let mut say = move || {
+    greeting.push_str(&quot; world&quot;);
+    println!(&quot;{}&quot;, greeting);
+};
+say();
+<span class="boring">}
+</span></code></pre></pre>
 <p>图片来源于<a href="https://zhuanlan.zhihu.com/p/341815515">Rust中的闭包与关键字move</a></p>
 <h3 id="参考"><a class="header" href="#参考">参考</a></h3>
-<p><a href="https://medium.com/swlh/understanding-closures-in-rust-21f286ed1759">Understanding Closures in Rust.</a>
-<a href="https://zhuanlan.zhihu.com/p/341815515">Rust中的闭包与关键字move</a></p>
+<p><a href="https://medium.com/swlh/understanding-closures-in-rust-21f286ed1759">Understanding Closures in Rust.</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/341815515">Rust中的闭包与关键字move</a></p>
+<p><a href="https://time.geekbang.org/course/detail/100060601-294649">rust语言基础(张汉东)</a></p>
 
                     </main>
 

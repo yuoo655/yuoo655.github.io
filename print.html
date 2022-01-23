@@ -329,21 +329,217 @@ fn()
 <p><strong>0x17186a829b0</strong></p>
 <h4 id="参考a-hrefhttpswwwpythontutorialnetadvanced-pythonpython-closureshttpswwwpythontutorialnetadvanced-pythonpython-closuresa"><a class="header" href="#参考a-hrefhttpswwwpythontutorialnetadvanced-pythonpython-closureshttpswwwpythontutorialnetadvanced-pythonpython-closuresa">参考:<a href="https://www.pythontutorial.net/advanced-python/python-closures/">https://www.pythontutorial.net/advanced-python/python-closures/</a></a></h4>
 <h2 id="rust中的闭包"><a class="header" href="#rust中的闭包">rust中的闭包</a></h2>
-<p>rust中闭包稍微复杂一些, 因为涉及到所有权,生命周期,以及可变引用相关内容</p>
+<p>rust中闭包稍微复杂一些, 因为涉及到获取参数的方式, 在rust中函数获取参数的方式有三种:获取所有权，可变借用和不可变借用</p>
 <h3 id="summary"><a class="header" href="#summary">Summary</a></h3>
 <p>闭包是<strong>函数指针(fn)和环境</strong>的组合</p>
 <p>闭包<strong>不捕获任何环境中变量</strong>是一个函数指针。</p>
-<p>闭包的方法移出了所捕获的变量的所有权**，则只会实现FnOnce(self)</p>
-<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且对变量进行了修改</strong>，即通过可变借用使用所捕获的变量，则会实现FnMut(&amp;mut self)</p>
-<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且没有对变量进行修改</strong>，即通过不可变借用使用所捕获的变量，则会实现Fn(&amp;self)</p>
+<p>闭包的方法移出了所捕获的变量的所有权，则会实现<code>FnOnce(self)</code></p>
+<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且对变量进行了修改</strong>，即通过可变借用使用所捕获的变量，则会实现<code>FnMut(&amp;mut self)</code></p>
+<p>闭包的方法<strong>没有</strong>移出所捕获的变量的所有权，<strong>并且没有对变量进行修改</strong>，即通过不可变借用使用所捕获的变量，则会实现<code>Fn(&amp;self)</code></p>
+<p>如果你希望强制闭包获取其使用的环境值的所有权，可以在参数列表前使用 <code>move</code> 关键字。这个技巧在将闭包传递给新线程以便将数据移动到新线程中时最为实用。</p>
 <blockquote>
 <p><img src="futures_in_rust/./../img/rust-closure2.jpg" alt="avatar" /></p>
 </blockquote>
+<h3 id="例"><a class="header" href="#例">例</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span>#![feature(unboxed_closures, fn_traits)]
+<span class="boring">fn main() {
+</span>//定义闭包结构体
+struct Say {
+    //捕获的环境变量
+    s: String,
+}
+
+//实现FnOnce方法
+impl FnOnce&lt;()&gt; for Say {
+    type  Output = ();
+    extern &quot;rust-call&quot;  fn call_once(self, args: ()) -&gt; () {
+        println!(&quot;{}&quot;, self.s);
+    }
+}
+
+//实现FnMut方法
+impl FnMut&lt;()&gt; for Say {
+    extern &quot;rust-call&quot;  fn call_mut(&amp;mut self, args: ()) -&gt; () {
+        self.s.push_str(&quot; world!&quot;);
+        println!(&quot;{}&quot;, self.s);
+    }
+}
+
+//实现Fn方法
+impl Fn&lt;()&gt; for Say {
+    extern &quot;rust-call&quot; fn call(&amp;self, args: ()) -&gt; () {
+        println!(&quot;{}&quot;, self.s);
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut greeting = &quot;hello&quot;.to_string();
+    //闭包say捕获环境变量greeting
+    let mut say = Say { s: greeting};
+    
+    //不修改环境变量 不捕获所有权
+    say.call(());
+    //修改环境变量, 不捕获所有权
+    say.call_mut(());
+    //移除所有权
+    say.call_once(());
+    //之后再调用call call_mut call_once就会报错
+}
+</code></pre></pre>
+<h3 id="在了解了rust闭包内部实现之后再看一些例子"><a class="header" href="#在了解了rust闭包内部实现之后再看一些例子">在了解了rust闭包内部实现之后,再看一些例子</a></h3>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//实现了call. 不修改环境变量,不捕获所有权,可多次调用say,但不能修改greeting
+let greeting = &quot;hello&quot;;
+let say = || {
+    println!(&quot;{}&quot;, greeting);
+};
+say();
+
+//实现了call_mut,修改环境变量,不捕获所有权,可多次调用say,可修改greeting
+let mut greeting = &quot;hello&quot;.to_string();
+let mut say = || {
+    greeting.push_str(&quot; world&quot;);
+    println!(&quot;{}&quot;, greeting);
+};
+say();
+
+
+//实现了call_once,修改环境变量(也可以不修改),捕获所有权,只能调用一次say
+let mut greeting = &quot;hello&quot;.to_string();
+let mut say = move || {
+    greeting.push_str(&quot; world&quot;);
+    println!(&quot;{}&quot;, greeting);
+};
+say();
+<span class="boring">}
+</span></code></pre></pre>
 <p>图片来源于<a href="https://zhuanlan.zhihu.com/p/341815515">Rust中的闭包与关键字move</a></p>
 <h3 id="参考"><a class="header" href="#参考">参考</a></h3>
-<p><a href="https://medium.com/swlh/understanding-closures-in-rust-21f286ed1759">Understanding Closures in Rust.</a>
-<a href="https://zhuanlan.zhihu.com/p/341815515">Rust中的闭包与关键字move</a></p>
+<p><a href="https://medium.com/swlh/understanding-closures-in-rust-21f286ed1759">Understanding Closures in Rust.</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/341815515">Rust中的闭包与关键字move</a></p>
+<p><a href="https://time.geekbang.org/course/detail/100060601-294649">rust语言基础(张汉东)</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="闭包到生成器"><a class="header" href="#闭包到生成器">闭包到生成器</a></h1>
+<h2 id="生成器"><a class="header" href="#生成器">生成器</a></h2>
+<p><strong>一个简单的生成器</strong></p>
+<blockquote>
+<p>下面gen是一个生成器. 可以看处它是使用闭包的语法声明的. 
+与闭包不同的是. 它多了一个yield关键字, 它可以通过resume()方法多次恢复.<br />
+每次resume()调用时,闭包内的代码都会运行, 直到遇到yield<br />
+resume返回 yield的值</p>
+</blockquote>
+<pre><pre class="playground"><code class="language-rust">#![feature(generators, generator_trait)]
+use std::ops::Generator;
+use std::pin::Pin;
+
+fn main() {
+    // 用闭包创建一个生成器
+    let mut gen = || {
+        yield 1;
+        yield 2;
+        yield 3;
+        yield 4;
+        return 5;
+    };
+
+    //不断调用resume执行
+    for _ in 0..5 {
+        let c = Pin::new(&amp;mut gen).resume(());
+        println!(&quot;{:?}&quot;, c);
+    }
+
+}
+</code></pre></pre>
+<blockquote>
+<p>在这个例子中.前4个调用resume()将返回GeneratorState::Yielded(x)，然后返回GeneratorState::Complete(x).</p>
+</blockquote>
+<p><strong>输出</strong></p>
+<p>Yielded(1)</p>
+<p>Yielded(2) </p>
+<p>Yielded(3) </p>
+<p>Yielded(4) </p>
+<p>Complete(5)</p>
+<blockquote>
+<p>resume()真正返回的是GeneratorState   ,定义如下</p>
+</blockquote>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum GeneratorState&lt;Y, R&gt; {
+    Yielded(Y),
+    Complete(R),
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong>接下来来看看生成器的背后具体做了什么,以及它和我们之前将的闭包的关系</strong></p>
+<pre><pre class="playground"><code class="language-rust">use std::pin::Pin;
+
+#[derive(Debug)]
+pub enum GeneratorState&lt;Y, R&gt; {
+    Yielded(Y),
+    Complete(R),
+}
+
+pub trait Generator&lt;R = ()&gt; {
+    type Yield;
+    type Return;
+    fn resume(self: Pin&lt;&amp;mut Self&gt;) -&gt; GeneratorState&lt;Self::Yield, Self::Return&gt;;
+}
+
+
+struct MyGen {
+    i: i32,
+}
+
+impl Generator for MyGen {
+    type Yield = i32;
+    type Return = i32;
+    fn resume(mut self : Pin&lt;&amp;mut Self&gt;) -&gt; GeneratorState&lt;Self::Yield, Self::Return&gt; {
+        self.i += 1;
+
+        if self.i == 5 {
+            GeneratorState::Complete(self.i)
+        } else {
+            GeneratorState::Yielded(self.i)
+        }
+    }
+}
+
+fn main() {
+    let mut gen = MyGen { i: 0 };    
+    for _ in 0..5 {
+        let c = Pin::new(&amp;mut gen).resume();
+        println!(&quot;{:?}&quot;, c);
+    }
+}
+</code></pre></pre>
+<p><strong>再看闭包内部的实现</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait FnOnce&lt;Args&gt; {
+    type Output;
+    extern &quot;rust-call&quot; fn call_once(self, args: Args) -&gt; Self::Output;
+}
+
+impl FnOnce&lt;()&gt; for Say {
+    type  Output = ();
+    extern &quot;rust-call&quot;  fn call_once(self, args: ()) -&gt; () {
+        foo();
+    }
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>可见每次生成器执行resume,相当于闭包执行了一次call_once(call, call_mut)</p>
+<p>与闭包不同的是,每次resume,生成器都将执行到结果为GeneratorState::Yielded()处, 编译器将生成器编译成状态机。每处yield出对应一个不同的状态.</p>
+<p><strong>参考</strong>
+<a href="https://cfsamson.github.io/books-futures-explained/introduction.html">Futures Explained in 200 Lines of Rust</a></p>
+<p><a href="https://time.geekbang.org/course/detail/100060601-294649">rust语言基础(张汉东)</a></p>
+<p><a href="https://github.com/rust-lang/rust/issues/43122">Experimentally add coroutines to Rust #43122</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-从零实现riscv编译器系列"><a class="header" href="#-从零实现riscv编译器系列">🚧 从零实现riscv编译器系列</a></h1>
 <h1 id="编译器组成"><a class="header" href="#编译器组成">编译器组成</a></h1>
 <p>源程序 --&gt;   前端--&gt;中间表示--&gt;后端   --&gt;目标程序</p>
@@ -3040,7 +3236,7 @@ __restore:
 <p>尤予阳:我感觉，先由硬件实现把中断转消息，或把中断视为一种高优先级的消息；然后再在线程或协程中用指定函数处理消息。通过限制消息处理函数能访问的数据范围，这时的共享就变成正常情况下的，线程或协程间的数据共享了。从而规避锁的大量使用。</p>
 <p>@xyong 在您说的这种方式下，如果线程或协程间确实需要同步互斥锁的情况，是不是就可以利用刚才说的“用uie控制用户进程去响应中断的时机”，来实现加解锁时候，关这个用户进程的中断的效果</p>
 <p>xyong:我还没有想得太清楚。</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rust重点"><a class="header" href="#rust重点">rust重点</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust笔记"><a class="header" href="#rust笔记">rust笔记</a></h1>
 <h2 id="所有权"><a class="header" href="#所有权">所有权</a></h2>
 <h4 id="动态内存分配"><a class="header" href="#动态内存分配">动态内存分配</a></h4>
 <blockquote>
@@ -3083,6 +3279,103 @@ let s2 = s1.clone();  ---- 将堆中的'helle'复制了一份, s1,s2分别指向
 <p>我们希望能够在程序的一个位置指定某些代码，并只在程序的某处实际需要结果的时候执行这些代码。这正是闭包的用武之地！</p>
 <p>生命周期避免了悬垂引用</p>
 <p>被引用的对象比它的引用者存在的时间更短可能造成悬垂引用</p>
+<h2 id="闭包"><a class="header" href="#闭包">闭包</a></h2>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait FnOnce&lt;Args&gt; {
+    type Output;
+    extern &quot;rust-call&quot; fn call_once(self, args: Args) -&gt; Self::Output;
+}
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//实现了FnMut
+let mut x = 5;
+{
+    let mut square_x = || x *= x;
+    square_x();
+}
+assert_eq!(x, 25);
+<span class="boring">}
+</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = &quot;hello&quot;;
+
+//x的所有权交给了闭包 equal_to_x
+let equal_to_x = move |z| z == x;
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong><code>Fn</code>类型闭包</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let square = |x| x * x;
+assert_eq!(square(5), 25);
+
+//使用Fn参数  
+fn call_with_one&lt;F&gt;(func: F) -&gt; usize
+    where F: Fn(usize) -&gt; usize {
+    func(1)
+}
+let double = |x| x * 2;
+assert_eq!(call_with_one(double), 2);
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong><code>FnMut</code>类型闭包</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut x = 5;
+{
+    let mut square_x = || x *= x;
+    square_x();
+}
+assert_eq!(x, 25);
+
+//使用FnMut参数
+fn do_twice&lt;F&gt;(mut func: F)
+    where F: FnMut()
+{
+    func();
+    func();
+}
+
+let mut x: usize = 1;
+{
+    let add_two_to_x = || x += 2;
+    do_twice(add_two_to_x);
+}
+assert_eq!(x, 5);
+<span class="boring">}
+</span></code></pre></pre>
+<p><strong><code>FnOnce</code>类型闭包</strong></p>
+<pre><pre class="playground"><code class="language-rust">
+<span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//使用FnONce参数
+fn consume_with_relish&lt;F&gt;(func: F)
+    where F: FnOnce() -&gt; String
+{
+    // `func` consumes its captured variables, so it cannot be run more
+    // than once.
+    println!(&quot;Consumed: {}&quot;, func());
+///
+    println!(&quot;Delicious!&quot;);
+///
+    // Attempting to invoke `func()` again will throw a `use of moved
+    // value` error for `func`.
+}
+///
+let x = String::from(&quot;x&quot;);
+let consume_and_return_x = move || x;
+consume_with_relish(consume_and_return_x);
+<span class="boring">}
+</span></code></pre></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="-rust学习记录"><a class="header" href="#-rust学习记录">🚧 rust学习记录</a></h1>
 <h2 id="这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现"><a class="header" href="#这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现">这里主要记录一些c实现的os一些常用数据结构已经操作在rust中怎么实现</a></h2>
 <p><strong>看一个c语言例子</strong></p>
