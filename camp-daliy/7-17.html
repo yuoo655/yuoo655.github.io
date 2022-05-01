@@ -347,13 +347,6 @@ panicked at 'It should shutdown!', src\sbi.rs:45:5
 
 <span class="boring">}
 </span></code></pre></pre>
-<p><strong>ch3repo</strong></p>
-<p>1:这一章由应用程序主动yeild exit 或者超时 来触发中断. 然后由traphandler进行处理并运行下一个程序...本质上没有调度策略..</p>
-<p>2:(1)本质上都是RR算法
-(2) p1 -&gt; p2 -&gt; p3 -&gt; p1结束 -&gt;p2开始-&gt;p4产生-&gt;p2结束-&gt;p3开始-&gt;p5产生-&gt;p3结束-&gt;p5开始</p>
-<p>我的算法下stride相同时选择TID较小的运行,因为是第一个选中的.</p>
-<p>3:
-参考https://piazza.com/class/i5j09fnsl7k5x0?cid=357</p>
 
                     </main>
 
